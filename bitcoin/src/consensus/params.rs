@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: CC0-1.0
 
-//! Bitcoin consensus parameters.
+//! Flokicoin consensus parameters.
 //!
-//! This module provides a predefined set of parameters for different Bitcoin
-//! chains (such as mainnet, testnet, testnet4).
+//! This module provides a predefined set of parameters for different Flokicoin
+//! networks (such as mainnet, testnet, testnet4).
 //!
 
 use crate::network::Network;
@@ -84,16 +84,16 @@ impl Params {
     /// The mainnet parameters.
     pub const MAINNET: Params = Params {
         network: Network::Bitcoin,
-        bip16_time: 1333238400,                 // Apr 1 2012
-        bip34_height: 227931, // 000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8
-        bip65_height: 388381, // 000000000000000004c2b624ed5d7756c508d90fd0da2c7c679febfa6c4735f0
-        bip66_height: 363725, // 00000000000000000379eaa19dce8c9b722d46ae6a57c2f1a988119488b50931
-        rule_change_activation_threshold: 1916, // 95%
-        miner_confirmation_window: 2016,
+        bip16_time: 1_631_485_359, // 2021-09-12 22:22:39 UTC
+        bip34_height: 1,
+        bip65_height: 1,
+        bip66_height: 1,
+        rule_change_activation_threshold: 6_840, // 95% of 7,200
+        miner_confirmation_window: 7_200,
         pow_limit: Target::MAX_ATTAINABLE_MAINNET,
         max_attainable_target: Target::MAX_ATTAINABLE_MAINNET,
-        pow_target_spacing: 10 * 60,            // 10 minutes.
-        pow_target_timespan: 14 * 24 * 60 * 60, // 2 weeks.
+        pow_target_spacing: 60, // 1 minute.
+        pow_target_timespan: 60, // 1 minute.
         allow_min_difficulty_blocks: false,
         no_pow_retargeting: false,
     };
@@ -102,16 +102,16 @@ impl Params {
     #[deprecated(since = "0.32.4", note = "Use TESTNET3 instead")]
     pub const TESTNET: Params = Params {
         network: Network::Testnet,
-        bip16_time: 1333238400,                 // Apr 1 2012
-        bip34_height: 21111, // 0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8
-        bip65_height: 581885, // 00000000007f6655f22f98e72ed80d8b06dc761d5da09df0fa1dc4be4f861eb6
-        bip66_height: 330776, // 000000002104c8c45e99a8853285a3b592602a3ccde2b832481da85e9e4ba182
-        rule_change_activation_threshold: 1512, // 75%
-        miner_confirmation_window: 2016,
+        bip16_time: 1_735_376_054, // 2024-12-28 08:54:14 UTC
+        bip34_height: 1,
+        bip65_height: 1,
+        bip66_height: 1,
+        rule_change_activation_threshold: 0,
+        miner_confirmation_window: 1,
         pow_limit: Target::MAX_ATTAINABLE_TESTNET,
         max_attainable_target: Target::MAX_ATTAINABLE_TESTNET,
-        pow_target_spacing: 10 * 60,            // 10 minutes.
-        pow_target_timespan: 14 * 24 * 60 * 60, // 2 weeks.
+        pow_target_spacing: 60, // 1 minute.
+        pow_target_timespan: 60, // 1 minute.
         allow_min_difficulty_blocks: true,
         no_pow_retargeting: false,
     };
@@ -119,16 +119,16 @@ impl Params {
     /// The testnet3 parameters.
     pub const TESTNET3: Params = Params {
         network: Network::Testnet,
-        bip16_time: 1333238400,                 // Apr 1 2012
-        bip34_height: 21111, // 0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8
-        bip65_height: 581885, // 00000000007f6655f22f98e72ed80d8b06dc761d5da09df0fa1dc4be4f861eb6
-        bip66_height: 330776, // 000000002104c8c45e99a8853285a3b592602a3ccde2b832481da85e9e4ba182
-        rule_change_activation_threshold: 1512, // 75%
-        miner_confirmation_window: 2016,
+        bip16_time: 1_735_376_054, // 2024-12-28 08:54:14 UTC
+        bip34_height: 1,
+        bip65_height: 1,
+        bip66_height: 1,
+        rule_change_activation_threshold: 0,
+        miner_confirmation_window: 1,
         pow_limit: Target::MAX_ATTAINABLE_TESTNET,
         max_attainable_target: Target::MAX_ATTAINABLE_TESTNET,
-        pow_target_spacing: 10 * 60,            // 10 minutes.
-        pow_target_timespan: 14 * 24 * 60 * 60, // 2 weeks.
+        pow_target_spacing: 60, // 1 minute.
+        pow_target_timespan: 60, // 1 minute.
         allow_min_difficulty_blocks: true,
         no_pow_retargeting: false,
     };
@@ -136,16 +136,16 @@ impl Params {
     /// The testnet4 parameters.
     pub const TESTNET4: Params = Params {
         network: Network::Testnet4,
-        bip16_time: 1333238400, // Apr 1 2012
+        bip16_time: 1_735_376_054, // 2024-12-28 08:54:14 UTC
         bip34_height: 1,
         bip65_height: 1,
         bip66_height: 1,
-        rule_change_activation_threshold: 1512, // 75%
-        miner_confirmation_window: 2016,
+        rule_change_activation_threshold: 1_512, // 75% of 2,016
+        miner_confirmation_window: 2_016,
         pow_limit: Target::MAX_ATTAINABLE_TESTNET,
         max_attainable_target: Target::MAX_ATTAINABLE_TESTNET,
-        pow_target_spacing: 10 * 60,            // 10 minutes.
-        pow_target_timespan: 14 * 24 * 60 * 60, // 2 weeks.
+        pow_target_spacing: 10 * 60,             // 10 minutes.
+        pow_target_timespan: 14 * 24 * 60 * 60,  // 2 weeks.
         allow_min_difficulty_blocks: true,
         no_pow_retargeting: false,
     };
@@ -153,16 +153,16 @@ impl Params {
     /// The signet parameters.
     pub const SIGNET: Params = Params {
         network: Network::Signet,
-        bip16_time: 1333238400, // Apr 1 2012
+        bip16_time: 1_735_376_054, // 2024-12-28 08:54:14 UTC
         bip34_height: 1,
         bip65_height: 1,
         bip66_height: 1,
-        rule_change_activation_threshold: 1916, // 95%
-        miner_confirmation_window: 2016,
+        rule_change_activation_threshold: 1_916, // 95% of 2,016
+        miner_confirmation_window: 2_016,
         pow_limit: Target::MAX_ATTAINABLE_SIGNET,
         max_attainable_target: Target::MAX_ATTAINABLE_SIGNET,
-        pow_target_spacing: 10 * 60,            // 10 minutes.
-        pow_target_timespan: 14 * 24 * 60 * 60, // 2 weeks.
+        pow_target_spacing: 60,                   // 1 minute.
+        pow_target_timespan: 60,                  // 1 minute.
         allow_min_difficulty_blocks: false,
         no_pow_retargeting: false,
     };
@@ -170,16 +170,16 @@ impl Params {
     /// The regtest parameters.
     pub const REGTEST: Params = Params {
         network: Network::Regtest,
-        bip16_time: 1333238400,  // Apr 1 2012
-        bip34_height: 100000000, // not activated on regtest
-        bip65_height: 1351,
-        bip66_height: 1251,                    // used only in rpc tests
-        rule_change_activation_threshold: 108, // 75%
-        miner_confirmation_window: 144,
+        bip16_time: 1_735_376_054,  // 2024-12-28 08:54:14 UTC
+        bip34_height: 100_000_000, // Not activated on regtest
+        bip65_height: 1_351,
+        bip66_height: 1_251,                  // Used only in rpc tests
+        rule_change_activation_threshold: 1, // Matches go-flokicoin regtest setting
+        miner_confirmation_window: 3,
         pow_limit: Target::MAX_ATTAINABLE_REGTEST,
         max_attainable_target: Target::MAX_ATTAINABLE_REGTEST,
-        pow_target_spacing: 10 * 60,            // 10 minutes.
-        pow_target_timespan: 14 * 24 * 60 * 60, // 2 weeks.
+        pow_target_spacing: 60,             // 1 minute.
+        pow_target_timespan: 60,            // 1 minute.
         allow_min_difficulty_blocks: true,
         no_pow_retargeting: true,
     };
