@@ -149,22 +149,30 @@ impl Target {
     ///
     /// Not all target values are attainable because consensus code uses the compact format to
     /// represent targets (see [`CompactTarget`]).
-    pub const MAX_ATTAINABLE_MAINNET: Self = Target(U256(0xFFFF_u128 << (208 - 128), 0));
+       /// Matches the Flokicoin mainnet pow limit (2^240 - 1).
+    pub const MAX_ATTAINABLE_MAINNET: Self = Target(U256(
+        0xffff_ffff_ffff_ffff_ffff_ffff_ffffu128,
+        0xffff_ffff_ffff_ffff_ffff_ffff_ffff_ffff,
+    ));
 
     /// The proof of work limit on testnet.
-    // Taken from Bitcoin Core but had lossy conversion to/from compact form.
-    // https://github.com/bitcoin/bitcoin/blob/8105bce5b384c72cf08b25b7c5343622754e7337/src/kernel/chainparams.cpp#L208
-    pub const MAX_ATTAINABLE_TESTNET: Self = Target(U256(0xFFFF_u128 << (208 - 128), 0));
+    /// Matches the Flokicoin testnet pow limit (2^255 - 1).
+    pub const MAX_ATTAINABLE_TESTNET: Self = Target(U256(
+        0x7fff_ffff_ffff_ffff_ffff_ffff_ffff_ffffu128,
+        0xffff_ffff_ffff_ffff_ffff_ffff_ffff_ffff,
+    ));
 
     /// The proof of work limit on regtest.
-    // Taken from Bitcoin Core but had lossy conversion to/from compact form.
-    // https://github.com/bitcoin/bitcoin/blob/8105bce5b384c72cf08b25b7c5343622754e7337/src/kernel/chainparams.cpp#L411
-    pub const MAX_ATTAINABLE_REGTEST: Self = Target(U256(0x7FFF_FF00u128 << 96, 0));
+    /// Matches the Flokicoin regtest pow limit (2^255 - 1).
+    pub const MAX_ATTAINABLE_REGTEST: Self = Target(U256(
+        0x7fff_ffff_ffff_ffff_ffff_ffff_ffff_ffffu128,
+        0xffff_ffff_ffff_ffff_ffff_ffff_ffff_ffff,
+    ));
 
     /// The proof of work limit on signet.
-    // Taken from Bitcoin Core but had lossy conversion to/from compact form.
-    // https://github.com/bitcoin/bitcoin/blob/8105bce5b384c72cf08b25b7c5343622754e7337/src/kernel/chainparams.cpp#L348
-    pub const MAX_ATTAINABLE_SIGNET: Self = Target(U256(0x0377_ae00 << 80, 0));
+    /// Matches the Flokicoin signet pow limit (0x7fffff << 232).
+    pub const MAX_ATTAINABLE_SIGNET: Self =
+        Target(U256(0x7fff_ff00_0000_0000_0000_0000_0000_0000u128, 0));
 
     /// Computes the [`Target`] value from a compact representation.
     ///
@@ -220,7 +228,14 @@ impl Target {
     #[cfg_attr(all(test, mutate), mutate)]
     pub fn is_met_by(&self, hash: BlockHash) -> bool {
         use hashes::Hash;
-        let hash = U256::from_le_bytes(hash.to_byte_array());
+        self.is_met_by_le_bytes(hash.to_byte_array())
+    }
+
+    /// Returns true if the provided 32-byte little-endian hash is less than or equal to this
+    /// [`Target`].
+    #[cfg_attr(all(test, mutate), mutate)]
+    pub fn is_met_by_le_bytes(&self, hash: [u8; 32]) -> bool {
+        let hash = U256::from_le_bytes(hash);
         hash <= self.0
     }
 
@@ -915,7 +930,8 @@ impl U256 {
 
 // Target::MAX as a float value. Calculated with U256::to_f64.
 // This is validated in the unit tests as well.
-const TARGET_MAX_F64: f64 = 2.695953529101131e67;
+// const TARGET_MAX_F64: f64 = 1.766847064778384e72;
+const TARGET_MAX_F64: f64 = 1.7668201048317172e72;
 
 impl<T: Into<u128>> From<T> for U256 {
     fn from(x: T) -> Self { U256(0, x.into()) }

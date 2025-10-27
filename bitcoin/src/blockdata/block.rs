@@ -12,6 +12,7 @@ use core::fmt;
 
 use hashes::{sha256d, Hash, HashEngine};
 use io::{Read, Write};
+use scrypt::{scrypt, Params as ScryptParams};
 
 use super::Weight;
 use crate::blockdata::script;
@@ -86,6 +87,21 @@ impl Header {
         BlockHash::from_engine(engine)
     }
 
+    /// Computes the proof-of-work hash using scrypt (N = 1024, r = 1, p = 1).
+    ///
+    /// The resulting hash is interpreted as a little-endian integer when compared against the
+    /// target threshold.
+    pub fn pow_hash(&self) -> [u8; 32] {
+        let serialized = encode::serialize(self);
+        debug_assert_eq!(serialized.len(), Self::SIZE);
+
+        let params = ScryptParams::new(10, 1, 1, 32).expect("scrypt parameters are valid");
+        let mut output = [0u8; 32];
+        scrypt(&serialized, &serialized, &params, &mut output)
+            .expect("scrypt hashing should not fail");
+        output
+    }
+
     /// Computes the target (range [0, T] inclusive) that a blockhash must land in to be valid.
     pub fn target(&self) -> Target { self.bits.into() }
 
@@ -100,15 +116,15 @@ impl Header {
     /// Computes the popular "difficulty" measure for mining and returns a float value of f64.
     pub fn difficulty_float(&self) -> f64 { self.target().difficulty_float() }
 
-    /// Checks that the proof-of-work for the block is valid, returning the block hash.
-    pub fn validate_pow(&self, required_target: Target) -> Result<BlockHash, ValidationError> {
+    /// Checks that the proof-of-work for the block is valid, returning the PoW hash.
+    pub fn validate_pow(&self, required_target: Target) -> Result<[u8; 32], ValidationError> {
         let target = self.target();
         if target != required_target {
             return Err(ValidationError::BadTarget);
         }
-        let block_hash = self.block_hash();
-        if target.is_met_by(block_hash) {
-            Ok(block_hash)
+        let pow_hash = self.pow_hash();
+        if target.is_met_by_le_bytes(pow_hash) {
+            Ok(pow_hash)
         } else {
             Err(ValidationError::BadProofOfWork)
         }
@@ -511,6 +527,48 @@ mod tests {
         assert_eq!(bad.bip34_block_height(), Err(super::Bip34Error::UnexpectedPush(push)));
     }
 
+     #[test]
+    fn block_test_loki() {
+        let params = Params::new(Network::Bitcoin);
+        // Mainnet block c3474fa0b6c00824b01ce630d03f4ba49e11ced6373164b38ed2741dcd90ba84
+        let some_block = hex!("0100000000000000000000000000000000000000000000000000000000000000000000000466bcf2299e92ab56852662658063defd6e20923ff4b30453d154b98831fbdcaf7d3e61ffff001f27f02d7c0101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff2d04ffff001d010425547769747465722031322f5365702f3230323120466c6f6b69206861732061727269766564ffffffff0100e8764817000000434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000");
+
+        let prevhash = hex!("0000000000000000000000000000000000000000000000000000000000000000");
+        let merkle = hex!("0466bcf2299e92ab56852662658063defd6e20923ff4b30453d154b98831fbdc");
+        let work = Work::from(0x000010001_u128);
+
+        let decode: Result<Block, _> = deserialize(&some_block);
+
+        assert!(decode.is_ok());
+        let real_decode = decode.unwrap();
+        assert_eq!(real_decode.header.version, Version(1));
+        assert_eq!(serialize(&real_decode.header.prev_blockhash), prevhash);
+        assert_eq!(real_decode.header.merkle_root, real_decode.compute_merkle_root().unwrap());
+        assert_eq!(serialize(&real_decode.header.merkle_root), merkle);
+        assert_eq!(real_decode.header.time, 1631485359);
+        assert_eq!(real_decode.header.bits, CompactTarget::from_consensus(520159231));
+        assert_eq!(real_decode.header.nonce, 2083385383);
+        assert_eq!(real_decode.header.work(), work);
+        assert_eq!(
+            real_decode.header.validate_pow(real_decode.header.target()).unwrap(),
+            real_decode.header.pow_hash()
+        );
+        assert_eq!(real_decode.header.difficulty(&params), 1);
+        assert_eq!(real_decode.header.difficulty_float(), 1.0);
+
+        assert_eq!(real_decode.total_size(), some_block.len());
+        assert_eq!(real_decode.base_size(), some_block.len());
+        assert_eq!(
+            real_decode.weight(),
+            Weight::from_non_witness_data_size(some_block.len() as u64)
+        );
+
+        // should be also ok for a non-witness block as commitment is optional in that case
+        assert!(real_decode.check_witness_commitment());
+
+        assert_eq!(serialize(&real_decode), some_block);
+    }
+
     #[test]
     fn block_test() {
         let params = Params::new(Network::Bitcoin);
@@ -538,7 +596,7 @@ mod tests {
         assert_eq!(real_decode.header.work(), work);
         assert_eq!(
             real_decode.header.validate_pow(real_decode.header.target()).unwrap(),
-            real_decode.block_hash()
+            real_decode.header.pow_hash()
         );
         assert_eq!(real_decode.header.difficulty(&params), 1);
         assert_eq!(real_decode.header.difficulty_float(), 1.0);
@@ -578,10 +636,8 @@ mod tests {
         assert_eq!(real_decode.header.bits, CompactTarget::from_consensus(0x1a06d450));
         assert_eq!(real_decode.header.nonce, 1879759182);
         assert_eq!(real_decode.header.work(), work);
-        assert_eq!(
-            real_decode.header.validate_pow(real_decode.header.target()).unwrap(),
-            real_decode.block_hash()
-        );
+        let pow_hash = real_decode.header.validate_pow(real_decode.header.target()).unwrap();
+        assert_eq!(pow_hash, real_decode.header.pow_hash());
         assert_eq!(real_decode.header.difficulty(&params), 2456598);
         assert_eq!(real_decode.header.difficulty_float(), 2456598.4399242126);
 
@@ -616,7 +672,7 @@ mod tests {
             deserialize(&some_header).expect("Can't deserialize correct block header");
         assert_eq!(
             some_header.validate_pow(some_header.target()).unwrap(),
-            some_header.block_hash()
+            some_header.pow_hash()
         );
 
         // test with zero target
