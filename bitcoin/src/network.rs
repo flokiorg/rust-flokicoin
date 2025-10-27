@@ -66,7 +66,7 @@ impl From<Network> for NetworkKind {
 #[non_exhaustive]
 pub enum Network {
     /// Mainnet Bitcoin.
-    #[serde(alias = "mainnet")]  // Accepts "mainnet" and "bitcoin"
+    #[cfg_attr(feature = "serde", serde(alias = "mainnet"))] // Accepts "mainnet" and "bitcoin"
     Bitcoin,
     /// Bitcoin's testnet network. (In future versions this will be combined
     /// into a single variant containing the version)
