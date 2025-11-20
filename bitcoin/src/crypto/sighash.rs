@@ -221,12 +221,13 @@ where
 
     fn get(&self, input_index: usize) -> Result<&TxOut, PrevoutsIndexError> {
         match self {
-            Prevouts::One(index, prevout) =>
+            Prevouts::One(index, prevout) => {
                 if input_index == *index {
                     Ok(prevout.borrow())
                 } else {
                     Err(PrevoutsIndexError::InvalidOneIndex)
-                },
+                }
+            }
             Prevouts::All(prevouts) => prevouts
                 .get(input_index)
                 .map(|x| x.borrow())
@@ -248,7 +249,9 @@ impl fmt::Display for PrevoutsSizeError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for PrevoutsSizeError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
 }
 
 /// A single prevout was been provided but all prevouts are needed without `ANYONECANPAY`.
@@ -264,7 +267,9 @@ impl fmt::Display for PrevoutsKindError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for PrevoutsKindError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
 }
 
 /// [`Prevouts`] index related errors.
@@ -307,7 +312,9 @@ impl<'s> ScriptPath<'s> {
         ScriptPath { script, leaf_version }
     }
     /// Creates a new `ScriptPath` structure using default leaf version value.
-    pub fn with_defaults(script: &'s Script) -> Self { Self::new(script, LeafVersion::TapScript) }
+    pub fn with_defaults(script: &'s Script) -> Self {
+        Self::new(script, LeafVersion::TapScript)
+    }
     /// Computes the leaf hash for this `ScriptPath`.
     pub fn leaf_hash(&self) -> TapLeafHash {
         let mut enc = TapLeafHash::engine();
@@ -323,7 +330,9 @@ impl<'s> ScriptPath<'s> {
 }
 
 impl<'s> From<ScriptPath<'s>> for TapLeafHash {
-    fn from(script_path: ScriptPath<'s>) -> TapLeafHash { script_path.leaf_hash() }
+    fn from(script_path: ScriptPath<'s>) -> TapLeafHash {
+        script_path.leaf_hash()
+    }
 }
 
 /// Hashtype of an input's signature, encoded in the last byte of the signature.
@@ -454,7 +463,9 @@ impl EcdsaSighashType {
     /// Converts [`EcdsaSighashType`] to a `u32` sighash flag.
     ///
     /// The returned value is guaranteed to be a valid according to standardness rules.
-    pub fn to_u32(self) -> u32 { self as u32 }
+    pub fn to_u32(self) -> u32 {
+        self as u32
+    }
 }
 
 impl From<EcdsaSighashType> for TapSighashType {
@@ -517,7 +528,9 @@ impl fmt::Display for InvalidSighashTypeError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for InvalidSighashTypeError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
 }
 
 /// This type is consensus valid but an input including it would prevent the transaction from
@@ -533,7 +546,9 @@ impl fmt::Display for NonStandardSighashTypeError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for NonStandardSighashTypeError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
 }
 
 /// Error returned for failure during parsing one of the sighash types.
@@ -554,7 +569,9 @@ impl fmt::Display for SighashTypeParseError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for SighashTypeParseError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
 }
 
 impl<R: Borrow<Transaction>> SighashCache<R> {
@@ -568,10 +585,14 @@ impl<R: Borrow<Transaction>> SighashCache<R> {
     }
 
     /// Returns the reference to the cached transaction.
-    pub fn transaction(&self) -> &Transaction { self.tx.borrow() }
+    pub fn transaction(&self) -> &Transaction {
+        self.tx.borrow()
+    }
 
     /// Destroys the cache and recovers the stored transaction.
-    pub fn into_transaction(self) -> R { self.tx }
+    pub fn into_transaction(self) -> R {
+        self.tx
+    }
 
     /// Encodes the BIP341 signing data for any flag type into a given object implementing the
     /// [`io::Write`] trait.
@@ -1138,7 +1159,9 @@ impl<'a> Annex<'a> {
     }
 
     /// Returns the Annex bytes data (including first byte `0x50`).
-    pub fn as_bytes(&self) -> &[u8] { self.0 }
+    pub fn as_bytes(&self) -> &[u8] {
+        self.0
+    }
 }
 
 impl<'a> Encodable for Annex<'a> {
@@ -1199,19 +1222,27 @@ impl std::error::Error for TaprootError {
 }
 
 impl From<transaction::InputsIndexError> for TaprootError {
-    fn from(e: transaction::InputsIndexError) -> Self { Self::InputsIndex(e) }
+    fn from(e: transaction::InputsIndexError) -> Self {
+        Self::InputsIndex(e)
+    }
 }
 
 impl From<PrevoutsSizeError> for TaprootError {
-    fn from(e: PrevoutsSizeError) -> Self { Self::PrevoutsSize(e) }
+    fn from(e: PrevoutsSizeError) -> Self {
+        Self::PrevoutsSize(e)
+    }
 }
 
 impl From<PrevoutsKindError> for TaprootError {
-    fn from(e: PrevoutsKindError) -> Self { Self::PrevoutsKind(e) }
+    fn from(e: PrevoutsKindError) -> Self {
+        Self::PrevoutsKind(e)
+    }
 }
 
 impl From<PrevoutsIndexError> for TaprootError {
-    fn from(e: PrevoutsIndexError) -> Self { Self::PrevoutsIndex(e) }
+    fn from(e: PrevoutsIndexError) -> Self {
+        Self::PrevoutsIndex(e)
+    }
 }
 
 /// Error computing a P2WPKH sighash.
@@ -1227,7 +1258,9 @@ pub enum P2wpkhError {
 internals::impl_from_infallible!(P2wpkhError);
 
 impl From<transaction::InputsIndexError> for P2wpkhError {
-    fn from(value: transaction::InputsIndexError) -> Self { P2wpkhError::Sighash(value) }
+    fn from(value: transaction::InputsIndexError) -> Self {
+        P2wpkhError::Sighash(value)
+    }
 }
 
 impl fmt::Display for P2wpkhError {
@@ -1276,7 +1309,9 @@ impl fmt::Display for SingleMissingOutputError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for SingleMissingOutputError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
 }
 
 /// Annex must be at least one byte long and the first bytes must be `0x50`.
@@ -1297,8 +1332,9 @@ impl fmt::Display for AnnexError {
 
         match *self {
             Empty => write!(f, "the annex is empty"),
-            IncorrectPrefix(byte) =>
-                write!(f, "incorrect prefix byte in the annex {:02x}, expecting 0x50", byte),
+            IncorrectPrefix(byte) => {
+                write!(f, "incorrect prefix byte in the annex {:02x}, expecting 0x50", byte)
+            }
         }
     }
 }
@@ -1379,10 +1415,12 @@ impl<E> EncodeSigningDataResult<E> {
     {
         match self {
             EncodeSigningDataResult::SighashSingleBug => EncodeSigningDataResult::SighashSingleBug,
-            EncodeSigningDataResult::WriteResult(Err(e)) =>
-                EncodeSigningDataResult::WriteResult(Err(f(e))),
-            EncodeSigningDataResult::WriteResult(Ok(o)) =>
-                EncodeSigningDataResult::WriteResult(Ok(o)),
+            EncodeSigningDataResult::WriteResult(Err(e)) => {
+                EncodeSigningDataResult::WriteResult(Err(f(e)))
+            }
+            EncodeSigningDataResult::WriteResult(Ok(o)) => {
+                EncodeSigningDataResult::WriteResult(Ok(o))
+            }
         }
     }
 }
@@ -1410,13 +1448,17 @@ impl<E> SigningDataError<E> {
         }
     }
 
-    fn sighash<E2: Into<E>>(error: E2) -> Self { Self::Sighash(error.into()) }
+    fn sighash<E2: Into<E>>(error: E2) -> Self {
+        Self::Sighash(error.into())
+    }
 }
 
 // We cannot simultaneously impl `From<E>`. it was determined that this alternative requires less
 // manual `map_err` calls.
 impl<E> From<io::Error> for SigningDataError<E> {
-    fn from(value: io::Error) -> Self { Self::Io(value) }
+    fn from(value: io::Error) -> Self {
+        Self::Io(value)
+    }
 }
 
 impl<E: fmt::Display> fmt::Display for SigningDataError<E> {

@@ -125,9 +125,13 @@ impl std::error::Error for SigFromSliceError {
 }
 
 impl From<secp256k1::Error> for SigFromSliceError {
-    fn from(e: secp256k1::Error) -> Self { Self::Secp256k1(e) }
+    fn from(e: secp256k1::Error) -> Self {
+        Self::Secp256k1(e)
+    }
 }
 
 impl From<InvalidSighashTypeError> for SigFromSliceError {
-    fn from(err: InvalidSighashTypeError) -> Self { Self::SighashType(err) }
+    fn from(err: InvalidSighashTypeError) -> Self {
+        Self::SighashType(err)
+    }
 }

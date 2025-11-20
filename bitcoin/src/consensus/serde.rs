@@ -27,7 +27,9 @@ where
     Case: hex::Case;
 
 impl<C: hex::Case> Default for Hex<C> {
-    fn default() -> Self { Hex(Default::default()) }
+    fn default() -> Self {
+        Hex(Default::default())
+    }
 }
 
 impl<C: hex::Case> ByteEncoder for Hex<C> {
@@ -75,7 +77,9 @@ pub mod hex {
     pub struct Encoder<C: Case>(BufEncoder<{ HEX_BUF_SIZE }>, PhantomData<C>);
 
     impl<C: Case> From<super::Hex<C>> for Encoder<C> {
-        fn from(_: super::Hex<C>) -> Self { Encoder(BufEncoder::new(), Default::default()) }
+        fn from(_: super::Hex<C>) -> Self {
+            Encoder(BufEncoder::new(), Default::default())
+        }
     }
 
     impl<C: Case> super::EncodeBytes for Encoder<C> {
@@ -131,7 +135,9 @@ pub mod hex {
         type DecodeError = DecodeError;
         type Decoder = Decoder<'a>;
 
-        fn from_str(s: &'a str) -> Result<Self::Decoder, Self::InitError> { Decoder::new(s) }
+        fn from_str(s: &'a str) -> Result<Self::Decoder, Self::InitError> {
+            Decoder::new(s)
+        }
     }
 
     impl super::IntoDeError for DecodeInitError {
@@ -254,7 +260,9 @@ impl<'a, W: fmt::Write, E: EncodeBytes> IoWrapper<'a, W, E> {
         IoWrapper { writer: ErrorTrackingWriter::new(writer), encoder }
     }
 
-    fn actually_flush(&mut self) -> fmt::Result { self.encoder.flush(&mut self.writer) }
+    fn actually_flush(&mut self) -> fmt::Result {
+        self.encoder.flush(&mut self.writer)
+    }
 }
 
 impl<'a, W: fmt::Write, E: EncodeBytes> Write for IoWrapper<'a, W, E> {
@@ -268,7 +276,9 @@ impl<'a, W: fmt::Write, E: EncodeBytes> Write for IoWrapper<'a, W, E> {
         }
     }
     // we intentionally ignore flushes because we will do a single flush at the end.
-    fn flush(&mut self) -> io::Result<()> { Ok(()) }
+    fn flush(&mut self) -> io::Result<()> {
+        Ok(())
+    }
 }
 
 /// Provides an instance of byte-to-string encoder.
@@ -328,7 +338,9 @@ struct BinWriter<S: SerializeSeq> {
 }
 
 impl<S: SerializeSeq> Write for BinWriter<S> {
-    fn write(&mut self, buf: &[u8]) -> io::Result<usize> { self.write_all(buf).map(|_| buf.len()) }
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        self.write_all(buf).map(|_| buf.len())
+    }
 
     fn write_all(&mut self, buf: &[u8]) -> io::Result<()> {
         for byte in buf {
@@ -340,7 +352,9 @@ impl<S: SerializeSeq> Write for BinWriter<S> {
         Ok(())
     }
 
-    fn flush(&mut self) -> io::Result<()> { Ok(()) }
+    fn flush(&mut self) -> io::Result<()> {
+        Ok(())
+    }
 }
 
 struct DisplayExpected<D: fmt::Display>(D);
@@ -366,11 +380,13 @@ fn consensus_error_into_serde<E: serde::de::Error>(error: ConsensusError) -> E {
                 expected[0], expected[1], expected[2], expected[3]
             )),
         ),
-        ConsensusError::NonMinimalVarInt =>
-            E::custom(format_args!("compact size was not encoded minimally")),
+        ConsensusError::NonMinimalVarInt => {
+            E::custom(format_args!("compact size was not encoded minimally"))
+        }
         ConsensusError::ParseFailed(msg) => E::custom(msg),
-        ConsensusError::UnsupportedSegwitFlag(flag) =>
-            E::invalid_value(Unexpected::Unsigned(flag.into()), &"segwit version 1 flag"),
+        ConsensusError::UnsupportedSegwitFlag(flag) => {
+            E::invalid_value(Unexpected::Unsigned(flag.into()), &"segwit version 1 flag")
+        }
     }
 }
 
@@ -436,11 +452,14 @@ impl<E> With<E> {
             let result = value.consensus_encode(&mut writer);
             match (result, writer.error) {
                 (Ok(_), None) => writer.serializer.end(),
-                (Ok(_), Some(error)) =>
-                    panic!("{} silently ate an IO error: {:?}", core::any::type_name::<T>(), error),
+                (Ok(_), Some(error)) => {
+                    panic!("{} silently ate an IO error: {:?}", core::any::type_name::<T>(), error)
+                }
                 (Err(io_error), Some(ser_error))
                     if io_error.kind() == io::ErrorKind::Other && io_error.get_ref().is_none() =>
-                    Err(ser_error),
+                {
+                    Err(ser_error)
+                }
                 (Err(io_error), ser_error) => panic!(
                     "{} returned an unexpected IO error: {:?} serialization error: {:?}",
                     core::any::type_name::<T>(),
@@ -500,5 +519,7 @@ struct SeqIterator<'a, S: serde::de::SeqAccess<'a>>(S, PhantomData<&'a ()>);
 impl<'a, S: serde::de::SeqAccess<'a>> Iterator for SeqIterator<'a, S> {
     type Item = Result<u8, S::Error>;
 
-    fn next(&mut self) -> Option<Self::Item> { self.0.next_element::<u8>().transpose() }
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next_element::<u8>().transpose()
+    }
 }

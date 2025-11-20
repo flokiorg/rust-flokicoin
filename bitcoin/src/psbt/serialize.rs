@@ -40,7 +40,9 @@ pub(crate) trait Deserialize: Sized {
 
 impl Psbt {
     /// Serialize a value as bytes in hex.
-    pub fn serialize_hex(&self) -> String { self.serialize().to_lower_hex_string() }
+    pub fn serialize_hex(&self) -> String {
+        self.serialize().to_lower_hex_string()
+    }
 
     /// Serialize as raw binary data
     pub fn serialize(&self) -> Vec<u8> {
@@ -141,11 +143,15 @@ impl_psbt_hash_de_serialize!(sha256d::Hash);
 impl_psbt_de_serialize!(Vec<TapLeafHash>);
 
 impl Serialize for ScriptBuf {
-    fn serialize(&self) -> Vec<u8> { self.to_bytes() }
+    fn serialize(&self) -> Vec<u8> {
+        self.to_bytes()
+    }
 }
 
 impl Deserialize for ScriptBuf {
-    fn deserialize(bytes: &[u8]) -> Result<Self, Error> { Ok(Self::from(bytes.to_vec())) }
+    fn deserialize(bytes: &[u8]) -> Result<Self, Error> {
+        Ok(Self::from(bytes.to_vec()))
+    }
 }
 
 impl Serialize for PublicKey {
@@ -163,7 +169,9 @@ impl Deserialize for PublicKey {
 }
 
 impl Serialize for secp256k1::PublicKey {
-    fn serialize(&self) -> Vec<u8> { self.serialize().to_vec() }
+    fn serialize(&self) -> Vec<u8> {
+        self.serialize().to_vec()
+    }
 }
 
 impl Deserialize for secp256k1::PublicKey {
@@ -173,7 +181,9 @@ impl Deserialize for secp256k1::PublicKey {
 }
 
 impl Serialize for ecdsa::Signature {
-    fn serialize(&self) -> Vec<u8> { self.to_vec() }
+    fn serialize(&self) -> Vec<u8> {
+        self.to_vec()
+    }
 }
 
 impl Deserialize for ecdsa::Signature {
@@ -237,15 +247,21 @@ impl Deserialize for KeySource {
 
 // partial sigs
 impl Serialize for Vec<u8> {
-    fn serialize(&self) -> Vec<u8> { self.clone() }
+    fn serialize(&self) -> Vec<u8> {
+        self.clone()
+    }
 }
 
 impl Deserialize for Vec<u8> {
-    fn deserialize(bytes: &[u8]) -> Result<Self, Error> { Ok(bytes.to_vec()) }
+    fn deserialize(bytes: &[u8]) -> Result<Self, Error> {
+        Ok(bytes.to_vec())
+    }
 }
 
 impl Serialize for PsbtSighashType {
-    fn serialize(&self) -> Vec<u8> { serialize(&self.to_u32()) }
+    fn serialize(&self) -> Vec<u8> {
+        serialize(&self.to_u32())
+    }
 }
 
 impl Deserialize for PsbtSighashType {
@@ -257,7 +273,9 @@ impl Deserialize for PsbtSighashType {
 
 // Taproot related ser/deser
 impl Serialize for XOnlyPublicKey {
-    fn serialize(&self) -> Vec<u8> { XOnlyPublicKey::serialize(self).to_vec() }
+    fn serialize(&self) -> Vec<u8> {
+        XOnlyPublicKey::serialize(self).to_vec()
+    }
 }
 
 impl Deserialize for XOnlyPublicKey {
@@ -267,7 +285,9 @@ impl Deserialize for XOnlyPublicKey {
 }
 
 impl Serialize for taproot::Signature {
-    fn serialize(&self) -> Vec<u8> { self.to_vec() }
+    fn serialize(&self) -> Vec<u8> {
+        self.to_vec()
+    }
 }
 
 impl Deserialize for taproot::Signature {
@@ -304,7 +324,9 @@ impl Deserialize for (XOnlyPublicKey, TapLeafHash) {
 }
 
 impl Serialize for ControlBlock {
-    fn serialize(&self) -> Vec<u8> { ControlBlock::serialize(self) }
+    fn serialize(&self) -> Vec<u8> {
+        ControlBlock::serialize(self)
+    }
 }
 
 impl Deserialize for ControlBlock {
@@ -398,7 +420,9 @@ impl Deserialize for TapTree {
 }
 
 // Helper function to compute key source len
-fn key_source_len(key_source: &KeySource) -> usize { 4 + 4 * (key_source.1).as_ref().len() }
+fn key_source_len(key_source: &KeySource) -> usize {
+    4 + 4 * (key_source.1).as_ref().len()
+}
 
 #[cfg(test)]
 mod tests {

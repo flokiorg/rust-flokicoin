@@ -29,8 +29,8 @@ use io::{Read, Write};
 
 use crate::consensus::encode::{self, Decodable, Encodable};
 use crate::consensus::Params;
-use crate::prelude::*;
 use crate::network::Network;
+use crate::prelude::*;
 
 #[rustfmt::skip]
 #[doc(inline)]
@@ -115,18 +115,26 @@ impl ServiceFlags {
     }
 
     /// Check whether [ServiceFlags] are included in this one.
-    pub fn has(self, flags: ServiceFlags) -> bool { (self.0 | flags.0) == self.0 }
+    pub fn has(self, flags: ServiceFlags) -> bool {
+        (self.0 | flags.0) == self.0
+    }
 
     /// Gets the integer representation of this [`ServiceFlags`].
-    pub fn to_u64(self) -> u64 { self.0 }
+    pub fn to_u64(self) -> u64 {
+        self.0
+    }
 }
 
 impl fmt::LowerHex for ServiceFlags {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { fmt::LowerHex::fmt(&self.0, f) }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::LowerHex::fmt(&self.0, f)
+    }
 }
 
 impl fmt::UpperHex for ServiceFlags {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { fmt::UpperHex::fmt(&self.0, f) }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::UpperHex::fmt(&self.0, f)
+    }
 }
 
 impl fmt::Display for ServiceFlags {
@@ -168,31 +176,43 @@ impl fmt::Display for ServiceFlags {
 }
 
 impl From<u64> for ServiceFlags {
-    fn from(f: u64) -> Self { ServiceFlags(f) }
+    fn from(f: u64) -> Self {
+        ServiceFlags(f)
+    }
 }
 
 impl From<ServiceFlags> for u64 {
-    fn from(flags: ServiceFlags) -> Self { flags.0 }
+    fn from(flags: ServiceFlags) -> Self {
+        flags.0
+    }
 }
 
 impl ops::BitOr for ServiceFlags {
     type Output = Self;
 
-    fn bitor(mut self, rhs: Self) -> Self { self.add(rhs) }
+    fn bitor(mut self, rhs: Self) -> Self {
+        self.add(rhs)
+    }
 }
 
 impl ops::BitOrAssign for ServiceFlags {
-    fn bitor_assign(&mut self, rhs: Self) { self.add(rhs); }
+    fn bitor_assign(&mut self, rhs: Self) {
+        self.add(rhs);
+    }
 }
 
 impl ops::BitXor for ServiceFlags {
     type Output = Self;
 
-    fn bitxor(mut self, rhs: Self) -> Self { self.remove(rhs) }
+    fn bitxor(mut self, rhs: Self) -> Self {
+        self.remove(rhs)
+    }
 }
 
 impl ops::BitXorAssign for ServiceFlags {
-    fn bitxor_assign(&mut self, rhs: Self) { self.remove(rhs); }
+    fn bitxor_assign(&mut self, rhs: Self) {
+        self.remove(rhs);
+    }
 }
 
 impl Encodable for ServiceFlags {
@@ -228,10 +248,14 @@ impl Magic {
     pub const REGTEST: Self = Self([0xFA, 0xBF, 0xB5, 0xDA]);
 
     /// Create network magic from bytes.
-    pub fn from_bytes(bytes: [u8; 4]) -> Magic { Magic(bytes) }
+    pub fn from_bytes(bytes: [u8; 4]) -> Magic {
+        Magic(bytes)
+    }
 
     /// Get network magic bytes.
-    pub fn to_bytes(self) -> [u8; 4] { self.0 }
+    pub fn to_bytes(self) -> [u8; 4] {
+        self.0
+    }
 
     /// Returns the magic bytes for the network defined by `params`.
     pub fn from_params(params: impl AsRef<Params>) -> Self {
@@ -314,35 +338,51 @@ impl Decodable for Magic {
 }
 
 impl AsRef<[u8]> for Magic {
-    fn as_ref(&self) -> &[u8] { &self.0 }
+    fn as_ref(&self) -> &[u8] {
+        &self.0
+    }
 }
 
 impl AsRef<[u8; 4]> for Magic {
-    fn as_ref(&self) -> &[u8; 4] { &self.0 }
+    fn as_ref(&self) -> &[u8; 4] {
+        &self.0
+    }
 }
 
 impl AsMut<[u8]> for Magic {
-    fn as_mut(&mut self) -> &mut [u8] { &mut self.0 }
+    fn as_mut(&mut self) -> &mut [u8] {
+        &mut self.0
+    }
 }
 
 impl AsMut<[u8; 4]> for Magic {
-    fn as_mut(&mut self) -> &mut [u8; 4] { &mut self.0 }
+    fn as_mut(&mut self) -> &mut [u8; 4] {
+        &mut self.0
+    }
 }
 
 impl Borrow<[u8]> for Magic {
-    fn borrow(&self) -> &[u8] { &self.0 }
+    fn borrow(&self) -> &[u8] {
+        &self.0
+    }
 }
 
 impl Borrow<[u8; 4]> for Magic {
-    fn borrow(&self) -> &[u8; 4] { &self.0 }
+    fn borrow(&self) -> &[u8; 4] {
+        &self.0
+    }
 }
 
 impl BorrowMut<[u8]> for Magic {
-    fn borrow_mut(&mut self) -> &mut [u8] { &mut self.0 }
+    fn borrow_mut(&mut self) -> &mut [u8] {
+        &mut self.0
+    }
 }
 
 impl BorrowMut<[u8; 4]> for Magic {
-    fn borrow_mut(&mut self) -> &mut [u8; 4] { &mut self.0 }
+    fn borrow_mut(&mut self) -> &mut [u8; 4] {
+        &mut self.0
+    }
 }
 
 /// An error in parsing magic bytes.
@@ -363,7 +403,9 @@ impl fmt::Display for ParseMagicError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for ParseMagicError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.error) }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        Some(&self.error)
+    }
 }
 
 /// Error in creating a Network from Magic bytes.
@@ -379,7 +421,9 @@ impl fmt::Display for UnknownMagicError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for UnknownMagicError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
 }
 
 #[cfg(test)]

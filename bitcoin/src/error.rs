@@ -46,11 +46,15 @@ impl std::error::Error for PrefixedHexError {
 }
 
 impl From<MissingPrefixError> for PrefixedHexError {
-    fn from(e: MissingPrefixError) -> Self { Self::MissingPrefix(e) }
+    fn from(e: MissingPrefixError) -> Self {
+        Self::MissingPrefix(e)
+    }
 }
 
 impl From<ParseIntError> for PrefixedHexError {
-    fn from(e: ParseIntError) -> Self { Self::ParseInt(e) }
+    fn from(e: ParseIntError) -> Self {
+        Self::ParseInt(e)
+    }
 }
 
 /// Error returned when parsing integer from an supposedly un-prefixed hex string.
@@ -86,11 +90,15 @@ impl std::error::Error for UnprefixedHexError {
 }
 
 impl From<ContainsPrefixError> for UnprefixedHexError {
-    fn from(e: ContainsPrefixError) -> Self { Self::ContainsPrefix(e) }
+    fn from(e: ContainsPrefixError) -> Self {
+        Self::ContainsPrefix(e)
+    }
 }
 
 impl From<ParseIntError> for UnprefixedHexError {
-    fn from(e: ParseIntError) -> Self { Self::ParseInt(e) }
+    fn from(e: ParseIntError) -> Self {
+        Self::ParseInt(e)
+    }
 }
 
 /// Error when hex string is missing a prefix (e.g. 0x).
@@ -100,7 +108,9 @@ pub struct MissingPrefixError {
 }
 
 impl MissingPrefixError {
-    pub(crate) fn new(s: &str) -> Self { Self { hex: s.into() } }
+    pub(crate) fn new(s: &str) -> Self {
+        Self { hex: s.into() }
+    }
 }
 
 impl fmt::Display for MissingPrefixError {
@@ -119,7 +129,9 @@ pub struct ContainsPrefixError {
 }
 
 impl ContainsPrefixError {
-    pub(crate) fn new(s: &str) -> Self { Self { hex: s.into() } }
+    pub(crate) fn new(s: &str) -> Self {
+        Self { hex: s.into() }
+    }
 }
 
 impl fmt::Display for ContainsPrefixError {

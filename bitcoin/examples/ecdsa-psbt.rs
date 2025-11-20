@@ -130,7 +130,9 @@ impl ColdStorage {
     }
 
     /// Returns the fingerprint for the master extended public key.
-    fn master_fingerprint(&self) -> Fingerprint { self.master_xpub.fingerprint() }
+    fn master_fingerprint(&self) -> Fingerprint {
+        self.master_xpub.fingerprint()
+    }
 
     /// Signs `psbt` with this signer.
     fn sign_psbt<C: Signing + Verification>(
@@ -282,9 +284,13 @@ fn previous_output() -> TxOut {
 struct Error(Box<dyn std::error::Error>);
 
 impl<T: std::error::Error + 'static> From<T> for Error {
-    fn from(e: T) -> Self { Error(Box::new(e)) }
+    fn from(e: T) -> Self {
+        Error(Box::new(e))
+    }
 }
 
 impl fmt::Debug for Error {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { fmt::Debug::fmt(&self.0, f) }
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Debug::fmt(&self.0, f)
+    }
 }

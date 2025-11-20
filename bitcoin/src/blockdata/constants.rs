@@ -29,8 +29,6 @@ pub const DIFFCHANGE_INTERVAL: u32 = 7200;
 /// How much time on average should occur between diffchanges.
 pub const DIFFCHANGE_TIMESPAN: u32 = 60;
 
-
-
 /// The factor that non-witness serialization data is multiplied by during weight calculation.
 pub const WITNESS_SCALE_FACTOR: usize = units::weight::WITNESS_SCALE_FACTOR;
 /// The maximum allowed number of signature check operations in a block.
@@ -86,20 +84,25 @@ fn bitcoin_genesis_tx(params: &Params) -> Transaction {
         match params.network {
             Network::Testnet4 => (
                 script::Builder::new()
-                .push_int(486604799)
-                .push_int_non_minimal(4)
-                .push_slice(b"Twitter 12/Sep/2021 Floki has arrived")
-                .into_script(),
-                script::Builder::new().push_slice(TESTNET4_GENESIS_OUTPUT_PK).push_opcode(OP_CHECKSIG).into_script(),
-
+                    .push_int(486604799)
+                    .push_int_non_minimal(4)
+                    .push_slice(b"Twitter 12/Sep/2021 Floki has arrived")
+                    .into_script(),
+                script::Builder::new()
+                    .push_slice(TESTNET4_GENESIS_OUTPUT_PK)
+                    .push_opcode(OP_CHECKSIG)
+                    .into_script(),
             ),
             _ => (
                 script::Builder::new()
-                .push_int(486604799)
-                .push_int_non_minimal(4)
-                .push_slice(b"Twitter 12/Sep/2021 Floki has arrived")
-                .into_script(),
-                script::Builder::new().push_slice(GENESIS_OUTPUT_PK).push_opcode(OP_CHECKSIG).into_script(),
+                    .push_int(486604799)
+                    .push_int_non_minimal(4)
+                    .push_slice(b"Twitter 12/Sep/2021 Floki has arrived")
+                    .into_script(),
+                script::Builder::new()
+                    .push_slice(GENESIS_OUTPUT_PK)
+                    .push_opcode(OP_CHECKSIG)
+                    .into_script(),
             ),
         }
     };
@@ -110,7 +113,8 @@ fn bitcoin_genesis_tx(params: &Params) -> Transaction {
         sequence: Sequence::MAX,
         witness: Witness::default(),
     });
-    ret.output.push(TxOut { value: Amount::from_sat(1000 * 100_000_000), script_pubkey: out_script });
+    ret.output
+        .push(TxOut { value: Amount::from_sat(1000 * 100_000_000), script_pubkey: out_script });
 
     // end
     ret
@@ -123,7 +127,6 @@ pub fn genesis_block(params: impl AsRef<Params>) -> Block {
     let hash: sha256d::Hash = txdata[0].compute_txid().into();
     let merkle_root: crate::TxMerkleNode = hash.into();
 
-
     match params.network {
         Network::Bitcoin => Block {
             header: block::Header {
@@ -133,6 +136,7 @@ pub fn genesis_block(params: impl AsRef<Params>) -> Block {
                 time: 1631485359,
                 bits: CompactTarget::from_consensus(0x1f00ffff),
                 nonce: 2083385383,
+                aux_pow: None,
             },
             txdata,
         },
@@ -144,6 +148,7 @@ pub fn genesis_block(params: impl AsRef<Params>) -> Block {
                 time: 1735376054,
                 bits: CompactTarget::from_consensus(0x207fffff),
                 nonce: 2083236894,
+                aux_pow: None,
             },
             txdata,
         },
@@ -155,6 +160,7 @@ pub fn genesis_block(params: impl AsRef<Params>) -> Block {
                 time: 1735376054,
                 bits: CompactTarget::from_consensus(0x207fffff),
                 nonce: 2083236894,
+                aux_pow: None,
             },
             txdata,
         },
@@ -166,6 +172,7 @@ pub fn genesis_block(params: impl AsRef<Params>) -> Block {
                 time: 1735376054,
                 bits: CompactTarget::from_consensus(0x207fffff),
                 nonce: 2083236894,
+                aux_pow: None,
             },
             txdata,
         },
@@ -177,6 +184,7 @@ pub fn genesis_block(params: impl AsRef<Params>) -> Block {
                 time: 1735376054,
                 bits: CompactTarget::from_consensus(0x207fffff),
                 nonce: 2083236894,
+                aux_pow: None,
             },
             txdata,
         },
@@ -264,8 +272,8 @@ mod test {
     use hex::test_hex_unwrap as hex;
 
     use super::*;
-    use crate::consensus::params;
     use crate::consensus::encode::serialize;
+    use crate::consensus::params;
 
     #[test]
     fn bitcoin_genesis_first_transaction() {

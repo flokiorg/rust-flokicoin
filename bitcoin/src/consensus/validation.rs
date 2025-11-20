@@ -191,12 +191,16 @@ impl fmt::Display for BitcoinconsensusError {
 
 #[cfg(all(feature = "std", feature = "bitcoinconsensus-std"))]
 impl std::error::Error for BitcoinconsensusError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        Some(&self.0)
+    }
 }
 
 #[cfg(all(feature = "std", not(feature = "bitcoinconsensus-std")))]
 impl std::error::Error for BitcoinconsensusError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
 }
 
 /// An error during transaction validation.
@@ -235,5 +239,7 @@ impl std::error::Error for TxVerifyError {
 }
 
 impl From<BitcoinconsensusError> for TxVerifyError {
-    fn from(e: BitcoinconsensusError) -> Self { TxVerifyError::ScriptVerification(e) }
+    fn from(e: BitcoinconsensusError) -> Self {
+        TxVerifyError::ScriptVerification(e)
+    }
 }

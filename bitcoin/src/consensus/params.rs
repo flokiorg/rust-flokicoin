@@ -76,7 +76,7 @@ pub static SIGNET: Params = Params::SIGNET;
 /// The regtest parameters.
 pub static REGTEST: Params = Params::REGTEST;
 
-#[allow(deprecated)]            // For `pow_limit`.
+#[allow(deprecated)] // For `pow_limit`.
 impl Params {
     /// The mainnet parameters (alias for `Params::MAINNET`).
     pub const BITCOIN: Params = Params::MAINNET;
@@ -92,7 +92,7 @@ impl Params {
         miner_confirmation_window: 7_200,
         pow_limit: Target::MAX_ATTAINABLE_MAINNET,
         max_attainable_target: Target::MAX_ATTAINABLE_MAINNET,
-        pow_target_spacing: 60, // 1 minute.
+        pow_target_spacing: 60,  // 1 minute.
         pow_target_timespan: 60, // 1 minute.
         allow_min_difficulty_blocks: false,
         no_pow_retargeting: false,
@@ -110,7 +110,7 @@ impl Params {
         miner_confirmation_window: 1,
         pow_limit: Target::MAX_ATTAINABLE_TESTNET,
         max_attainable_target: Target::MAX_ATTAINABLE_TESTNET,
-        pow_target_spacing: 60, // 1 minute.
+        pow_target_spacing: 60,  // 1 minute.
         pow_target_timespan: 60, // 1 minute.
         allow_min_difficulty_blocks: true,
         no_pow_retargeting: false,
@@ -127,7 +127,7 @@ impl Params {
         miner_confirmation_window: 1,
         pow_limit: Target::MAX_ATTAINABLE_TESTNET,
         max_attainable_target: Target::MAX_ATTAINABLE_TESTNET,
-        pow_target_spacing: 60, // 1 minute.
+        pow_target_spacing: 60,  // 1 minute.
         pow_target_timespan: 60, // 1 minute.
         allow_min_difficulty_blocks: true,
         no_pow_retargeting: false,
@@ -144,8 +144,8 @@ impl Params {
         miner_confirmation_window: 2_016,
         pow_limit: Target::MAX_ATTAINABLE_TESTNET,
         max_attainable_target: Target::MAX_ATTAINABLE_TESTNET,
-        pow_target_spacing: 10 * 60,             // 10 minutes.
-        pow_target_timespan: 14 * 24 * 60 * 60,  // 2 weeks.
+        pow_target_spacing: 10 * 60,            // 10 minutes.
+        pow_target_timespan: 14 * 24 * 60 * 60, // 2 weeks.
         allow_min_difficulty_blocks: true,
         no_pow_retargeting: false,
     };
@@ -161,8 +161,8 @@ impl Params {
         miner_confirmation_window: 2_016,
         pow_limit: Target::MAX_ATTAINABLE_SIGNET,
         max_attainable_target: Target::MAX_ATTAINABLE_SIGNET,
-        pow_target_spacing: 60,                   // 1 minute.
-        pow_target_timespan: 60,                  // 1 minute.
+        pow_target_spacing: 60,  // 1 minute.
+        pow_target_timespan: 60, // 1 minute.
         allow_min_difficulty_blocks: false,
         no_pow_retargeting: false,
     };
@@ -170,16 +170,16 @@ impl Params {
     /// The regtest parameters.
     pub const REGTEST: Params = Params {
         network: Network::Regtest,
-        bip16_time: 1_735_376_054,  // 2024-12-28 08:54:14 UTC
+        bip16_time: 1_735_376_054, // 2024-12-28 08:54:14 UTC
         bip34_height: 100_000_000, // Not activated on regtest
         bip65_height: 1_351,
-        bip66_height: 1_251,                  // Used only in rpc tests
+        bip66_height: 1_251,                 // Used only in rpc tests
         rule_change_activation_threshold: 1, // Matches go-flokicoin regtest setting
         miner_confirmation_window: 3,
         pow_limit: Target::MAX_ATTAINABLE_REGTEST,
         max_attainable_target: Target::MAX_ATTAINABLE_REGTEST,
-        pow_target_spacing: 60,             // 1 minute.
-        pow_target_timespan: 60,            // 1 minute.
+        pow_target_spacing: 60,  // 1 minute.
+        pow_target_timespan: 60, // 1 minute.
         allow_min_difficulty_blocks: true,
         no_pow_retargeting: true,
     };
@@ -202,25 +202,37 @@ impl Params {
 }
 
 impl From<Network> for Params {
-    fn from(value: Network) -> Self { Self::new(value) }
+    fn from(value: Network) -> Self {
+        Self::new(value)
+    }
 }
 
 impl From<&Network> for Params {
-    fn from(value: &Network) -> Self { Self::new(*value) }
+    fn from(value: &Network) -> Self {
+        Self::new(*value)
+    }
 }
 
 impl From<Network> for &'static Params {
-    fn from(value: Network) -> Self { value.params() }
+    fn from(value: Network) -> Self {
+        value.params()
+    }
 }
 
 impl From<&Network> for &'static Params {
-    fn from(value: &Network) -> Self { value.params() }
+    fn from(value: &Network) -> Self {
+        value.params()
+    }
 }
 
 impl AsRef<Params> for Params {
-    fn as_ref(&self) -> &Params { self }
+    fn as_ref(&self) -> &Params {
+        self
+    }
 }
 
 impl AsRef<Params> for Network {
-    fn as_ref(&self) -> &Params { Self::params(*self) }
+    fn as_ref(&self) -> &Params {
+        Self::params(*self)
+    }
 }

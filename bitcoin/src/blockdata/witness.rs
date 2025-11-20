@@ -284,10 +284,14 @@ impl Witness {
     }
 
     /// Convenience method to create an array of byte-arrays from this witness.
-    pub fn to_vec(&self) -> Vec<Vec<u8>> { self.iter().map(|s| s.to_vec()).collect() }
+    pub fn to_vec(&self) -> Vec<Vec<u8>> {
+        self.iter().map(|s| s.to_vec()).collect()
+    }
 
     /// Returns `true` if the witness contains no element.
-    pub fn is_empty(&self) -> bool { self.witness_elements == 0 }
+    pub fn is_empty(&self) -> bool {
+        self.witness_elements == 0
+    }
 
     /// Returns a struct implementing [`Iterator`].
     pub fn iter(&self) -> Iter {
@@ -295,7 +299,9 @@ impl Witness {
     }
 
     /// Returns the number of elements this witness holds.
-    pub fn len(&self) -> usize { self.witness_elements }
+    pub fn len(&self) -> usize {
+        self.witness_elements
+    }
 
     /// Returns the number of bytes this witness contributes to a transactions total size.
     pub fn size(&self) -> usize {
@@ -403,15 +409,15 @@ impl Witness {
     /// [Script::is_p2tr](crate::blockdata::script::Script::is_p2tr) to
     /// check whether this is actually a Taproot witness.
     pub fn tapscript(&self) -> Option<&Script> {
-            if self.is_empty() {
-                return None;
-            }
+        if self.is_empty() {
+            return None;
+        }
 
-            if self.taproot_annex().is_some() {
-                self.third_to_last().map(Script::from_bytes)
-            } else {
-                self.second_to_last().map(Script::from_bytes)
-            }
+        if self.taproot_annex().is_some() {
+            self.third_to_last().map(Script::from_bytes)
+        } else {
+            self.second_to_last().map(Script::from_bytes)
+        }
     }
 
     /// Get the taproot control block following BIP341 rules.
@@ -422,15 +428,15 @@ impl Witness {
     /// [Script::is_p2tr](crate::blockdata::script::Script::is_p2tr) to
     /// check whether this is actually a Taproot witness.
     pub fn taproot_control_block(&self) -> Option<&[u8]> {
-            if self.is_empty() {
-                return None;
-            }
+        if self.is_empty() {
+            return None;
+        }
 
-            if self.taproot_annex().is_some() {
-                self.second_to_last()
-            } else {
-                self.last()
-            }
+        if self.taproot_annex().is_some() {
+            self.second_to_last()
+        } else {
+            self.last()
+        }
     }
 
     /// Get the taproot annex following BIP341 rules.
@@ -465,7 +471,9 @@ impl Witness {
 impl Index<usize> for Witness {
     type Output = [u8];
 
-    fn index(&self, index: usize) -> &Self::Output { self.nth(index).expect("Out of Bounds") }
+    fn index(&self, index: usize) -> &Self::Output {
+        self.nth(index).expect("Out of Bounds")
+    }
 }
 
 impl<'a> Iterator for Iter<'a> {
@@ -494,7 +502,9 @@ impl<'a> IntoIterator for &'a Witness {
     type IntoIter = Iter<'a>;
     type Item = &'a [u8];
 
-    fn into_iter(self) -> Self::IntoIter { self.iter() }
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
 }
 
 // Serde keep backward compatibility with old Vec<Vec<u8>> format
@@ -559,8 +569,9 @@ impl<'de> serde::Deserialize<'de> for Witness {
                                 &"a valid hex character",
                             ),
                         },
-                        OddLengthString(ref e) =>
-                            de::Error::invalid_length(e.length(), &"an even length string"),
+                        OddLengthString(ref e) => {
+                            de::Error::invalid_length(e.length(), &"an even length string")
+                        }
                     })?;
                     ret.push(vec);
                 }
@@ -578,23 +589,33 @@ impl<'de> serde::Deserialize<'de> for Witness {
 }
 
 impl From<Vec<Vec<u8>>> for Witness {
-    fn from(vec: Vec<Vec<u8>>) -> Self { Witness::from_slice(&vec) }
+    fn from(vec: Vec<Vec<u8>>) -> Self {
+        Witness::from_slice(&vec)
+    }
 }
 
 impl From<&[&[u8]]> for Witness {
-    fn from(slice: &[&[u8]]) -> Self { Witness::from_slice(slice) }
+    fn from(slice: &[&[u8]]) -> Self {
+        Witness::from_slice(slice)
+    }
 }
 
 impl From<&[Vec<u8>]> for Witness {
-    fn from(slice: &[Vec<u8>]) -> Self { Witness::from_slice(slice) }
+    fn from(slice: &[Vec<u8>]) -> Self {
+        Witness::from_slice(slice)
+    }
 }
 
 impl From<Vec<&[u8]>> for Witness {
-    fn from(vec: Vec<&[u8]>) -> Self { Witness::from_slice(&vec) }
+    fn from(vec: Vec<&[u8]>) -> Self {
+        Witness::from_slice(&vec)
+    }
 }
 
 impl Default for Witness {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 #[cfg(test)]

@@ -113,17 +113,21 @@ impl fmt::Display for Error {
             InvalidMagic => f.write_str("invalid magic"),
             MissingUtxo => f.write_str("UTXO information is not present in PSBT"),
             InvalidSeparator => f.write_str("invalid separator"),
-            PsbtUtxoOutOfbounds =>
-                f.write_str("output index is out of bounds of non witness script output array"),
+            PsbtUtxoOutOfbounds => {
+                f.write_str("output index is out of bounds of non witness script output array")
+            }
             InvalidKey(ref rkey) => write!(f, "invalid key: {}", rkey),
-            InvalidProprietaryKey =>
-                write!(f, "non-proprietary key type found when proprietary key was expected"),
+            InvalidProprietaryKey => {
+                write!(f, "non-proprietary key type found when proprietary key was expected")
+            }
             DuplicateKey(ref rkey) => write!(f, "duplicate key: {}", rkey),
             UnsignedTxHasScriptSigs => f.write_str("the unsigned transaction has script sigs"),
-            UnsignedTxHasScriptWitnesses =>
-                f.write_str("the unsigned transaction has script witnesses"),
-            MustHaveUnsignedTx =>
-                f.write_str("partially signed transactions must have an unsigned transaction"),
+            UnsignedTxHasScriptWitnesses => {
+                f.write_str("the unsigned transaction has script witnesses")
+            }
+            MustHaveUnsignedTx => {
+                f.write_str("partially signed transactions must have an unsigned transaction")
+            }
             NoMorePairs => f.write_str("no more key-value pairs for this psbt map"),
             UnexpectedUnsignedTx { expected: ref e, actual: ref a } => write!(
                 f,
@@ -154,8 +158,9 @@ impl fmt::Display for Error {
             TapTree(ref e) => write_err!(f, "taproot tree error"; e),
             XPubKey(s) => write!(f, "xpub key error -  {}", s),
             Version(s) => write!(f, "version error {}", s),
-            PartialDataConsumption =>
-                f.write_str("data not consumed entirely when explicitly deserializing"),
+            PartialDataConsumption => {
+                f.write_str("data not consumed entirely when explicitly deserializing")
+            }
             Io(ref e) => write_err!(f, "I/O error"; e),
         }
     }
@@ -204,13 +209,19 @@ impl std::error::Error for Error {
 }
 
 impl From<hashes::FromSliceError> for Error {
-    fn from(e: hashes::FromSliceError) -> Error { Error::InvalidHash(e) }
+    fn from(e: hashes::FromSliceError) -> Error {
+        Error::InvalidHash(e)
+    }
 }
 
 impl From<encode::Error> for Error {
-    fn from(e: encode::Error) -> Self { Error::ConsensusEncoding(e) }
+    fn from(e: encode::Error) -> Self {
+        Error::ConsensusEncoding(e)
+    }
 }
 
 impl From<io::Error> for Error {
-    fn from(e: io::Error) -> Self { Error::Io(e) }
+    fn from(e: io::Error) -> Self {
+        Error::Io(e)
+    }
 }

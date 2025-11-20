@@ -70,7 +70,9 @@ impl WitnessVersion {
     /// NB: this is not the same as an integer representation of the opcode signifying witness
     /// version in bitcoin script. Thus, there is no function to directly convert witness version
     /// into a byte since the conversion requires context (bitcoin script or just a version number).
-    pub fn to_num(self) -> u8 { self as u8 }
+    pub fn to_num(self) -> u8 {
+        self as u8
+    }
 
     /// Converts this witness version to a GF32 field element.
     pub fn to_fe(self) -> Fe32 {
@@ -80,7 +82,9 @@ impl WitnessVersion {
 
 /// Prints [`WitnessVersion`] number (from 0 to 16) as integer, without any prefix or suffix.
 impl fmt::Display for WitnessVersion {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { write!(f, "{}", *self as u8) }
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", *self as u8)
+    }
 }
 
 impl FromStr for WitnessVersion {
@@ -95,7 +99,9 @@ impl FromStr for WitnessVersion {
 impl TryFrom<bech32::Fe32> for WitnessVersion {
     type Error = TryFromError;
 
-    fn try_from(value: Fe32) -> Result<Self, Self::Error> { Self::try_from(value.to_u8()) }
+    fn try_from(value: Fe32) -> Result<Self, Self::Error> {
+        Self::try_from(value.to_u8())
+    }
 }
 
 impl TryFrom<u8> for WitnessVersion {
@@ -133,8 +139,9 @@ impl TryFrom<Opcode> for WitnessVersion {
     fn try_from(opcode: Opcode) -> Result<Self, Self::Error> {
         match opcode.to_u8() {
             0 => Ok(WitnessVersion::V0),
-            version if version >= OP_PUSHNUM_1.to_u8() && version <= OP_PUSHNUM_16.to_u8() =>
-                WitnessVersion::try_from(version - OP_PUSHNUM_1.to_u8() + 1),
+            version if version >= OP_PUSHNUM_1.to_u8() && version <= OP_PUSHNUM_16.to_u8() => {
+                WitnessVersion::try_from(version - OP_PUSHNUM_1.to_u8() + 1)
+            }
             invalid => Err(TryFromError { invalid }),
         }
     }
@@ -153,7 +160,9 @@ impl<'a> TryFrom<Instruction<'a>> for WitnessVersion {
 }
 
 impl From<WitnessVersion> for Fe32 {
-    fn from(version: WitnessVersion) -> Self { version.to_fe() }
+    fn from(version: WitnessVersion) -> Self {
+        version.to_fe()
+    }
 }
 
 impl From<WitnessVersion> for Opcode {
@@ -201,11 +210,15 @@ impl std::error::Error for FromStrError {
 }
 
 impl From<ParseIntError> for FromStrError {
-    fn from(e: ParseIntError) -> Self { Self::Unparsable(e) }
+    fn from(e: ParseIntError) -> Self {
+        Self::Unparsable(e)
+    }
 }
 
 impl From<TryFromError> for FromStrError {
-    fn from(e: TryFromError) -> Self { Self::Invalid(e) }
+    fn from(e: TryFromError) -> Self {
+        Self::Invalid(e)
+    }
 }
 
 /// Error attempting to create a [`WitnessVersion`] from an [`Instruction`]
@@ -244,7 +257,9 @@ impl std::error::Error for TryFromInstructionError {
 }
 
 impl From<TryFromError> for TryFromInstructionError {
-    fn from(e: TryFromError) -> Self { Self::TryFrom(e) }
+    fn from(e: TryFromError) -> Self {
+        Self::TryFrom(e)
+    }
 }
 
 /// Error attempting to create a [`WitnessVersion`] from an integer.
@@ -256,7 +271,9 @@ pub struct TryFromError {
 
 impl TryFromError {
     /// Returns the invalid non-witness version integer.
-    pub fn invalid_version(&self) -> u8 { self.invalid }
+    pub fn invalid_version(&self) -> u8 {
+        self.invalid
+    }
 }
 
 impl fmt::Display for TryFromError {

@@ -90,11 +90,15 @@ impl core::str::FromStr for CommandString {
 }
 
 impl fmt::Display for CommandString {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { f.write_str(self.0.as_ref()) }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str(self.0.as_ref())
+    }
 }
 
 impl AsRef<str> for CommandString {
-    fn as_ref(&self) -> &str { self.0.as_ref() }
+    fn as_ref(&self) -> &str {
+        self.0.as_ref()
+    }
 }
 
 impl Encodable for CommandString {
@@ -145,7 +149,9 @@ impl fmt::Display for CommandStringError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for CommandStringError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
 }
 
 /// A Network message
@@ -317,20 +323,28 @@ impl RawNetworkMessage {
     }
 
     /// The actual message data
-    pub fn payload(&self) -> &NetworkMessage { &self.payload }
+    pub fn payload(&self) -> &NetworkMessage {
+        &self.payload
+    }
 
     /// Magic bytes to identify the network these messages are meant for
-    pub fn magic(&self) -> &Magic { &self.magic }
+    pub fn magic(&self) -> &Magic {
+        &self.magic
+    }
 
     /// Return the message command as a static string reference.
     ///
     /// This returns `"unknown"` for [NetworkMessage::Unknown],
     /// regardless of the actual command in the unknown message.
     /// Use the [Self::command] method to get the command for unknown messages.
-    pub fn cmd(&self) -> &'static str { self.payload.cmd() }
+    pub fn cmd(&self) -> &'static str {
+        self.payload.cmd()
+    }
 
     /// Return the CommandString for the message command.
-    pub fn command(&self) -> CommandString { self.payload.command() }
+    pub fn command(&self) -> CommandString {
+        self.payload.command()
+    }
 }
 
 struct HeaderSerializationWrapper<'a>(&'a Vec<block::Header>);
@@ -360,8 +374,9 @@ impl Encodable for NetworkMessage {
             NetworkMessage::GetHeaders(ref dat) => dat.consensus_encode(writer),
             NetworkMessage::Tx(ref dat) => dat.consensus_encode(writer),
             NetworkMessage::Block(ref dat) => dat.consensus_encode(writer),
-            NetworkMessage::Headers(ref dat) =>
-                HeaderSerializationWrapper(dat).consensus_encode(writer),
+            NetworkMessage::Headers(ref dat) => {
+                HeaderSerializationWrapper(dat).consensus_encode(writer)
+            }
             NetworkMessage::Ping(ref dat) => dat.consensus_encode(writer),
             NetworkMessage::Pong(ref dat) => dat.consensus_encode(writer),
             NetworkMessage::MerkleBlock(ref dat) => dat.consensus_encode(writer),
@@ -446,15 +461,19 @@ impl Decodable for RawNetworkMessage {
 
         let mut mem_d = raw_payload.as_slice();
         let payload = match &cmd.0[..] {
-            "version" =>
-                NetworkMessage::Version(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
+            "version" => {
+                NetworkMessage::Version(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
             "verack" => NetworkMessage::Verack,
-            "addr" =>
-                NetworkMessage::Addr(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
-            "inv" =>
-                NetworkMessage::Inv(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
-            "getdata" =>
-                NetworkMessage::GetData(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
+            "addr" => {
+                NetworkMessage::Addr(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
+            "inv" => {
+                NetworkMessage::Inv(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
+            "getdata" => {
+                NetworkMessage::GetData(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
             "notfound" => NetworkMessage::NotFound(Decodable::consensus_decode_from_finite_reader(
                 &mut mem_d,
             )?),
@@ -465,17 +484,20 @@ impl Decodable for RawNetworkMessage {
                 Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
             ),
             "mempool" => NetworkMessage::MemPool,
-            "block" =>
-                NetworkMessage::Block(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
+            "block" => {
+                NetworkMessage::Block(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
             "headers" => NetworkMessage::Headers(
                 HeaderDeserializationWrapper::consensus_decode_from_finite_reader(&mut mem_d)?.0,
             ),
             "sendheaders" => NetworkMessage::SendHeaders,
             "getaddr" => NetworkMessage::GetAddr,
-            "ping" =>
-                NetworkMessage::Ping(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
-            "pong" =>
-                NetworkMessage::Pong(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
+            "ping" => {
+                NetworkMessage::Ping(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
+            "pong" => {
+                NetworkMessage::Pong(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
             "merkleblock" => NetworkMessage::MerkleBlock(
                 Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
             ),
@@ -490,8 +512,9 @@ impl Decodable for RawNetworkMessage {
             "getcfilters" => NetworkMessage::GetCFilters(
                 Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
             ),
-            "cfilter" =>
-                NetworkMessage::CFilter(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
+            "cfilter" => {
+                NetworkMessage::CFilter(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
             "getcfheaders" => NetworkMessage::GetCFHeaders(
                 Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
             ),
@@ -504,10 +527,12 @@ impl Decodable for RawNetworkMessage {
             "cfcheckpt" => NetworkMessage::CFCheckpt(
                 Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
             ),
-            "reject" =>
-                NetworkMessage::Reject(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
-            "alert" =>
-                NetworkMessage::Alert(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
+            "reject" => {
+                NetworkMessage::Reject(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
+            "alert" => {
+                NetworkMessage::Alert(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
             "feefilter" => NetworkMessage::FeeFilter(
                 Decodable::consensus_decode_from_finite_reader(&mut mem_d)?,
             ),
@@ -524,8 +549,9 @@ impl Decodable for RawNetworkMessage {
                 &mut mem_d,
             )?),
             "wtxidrelay" => NetworkMessage::WtxidRelay,
-            "addrv2" =>
-                NetworkMessage::AddrV2(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?),
+            "addrv2" => {
+                NetworkMessage::AddrV2(Decodable::consensus_decode_from_finite_reader(&mut mem_d)?)
+            }
             "sendaddrv2" => NetworkMessage::SendAddrV2,
             _ => NetworkMessage::Unknown { command: cmd, payload: raw_payload },
         };
@@ -562,7 +588,9 @@ mod test {
     };
     use crate::p2p::ServiceFlags;
 
-    fn hash(slice: [u8; 32]) -> Hash { Hash::from_slice(&slice).unwrap() }
+    fn hash(slice: [u8; 32]) -> Hash {
+        Hash::from_slice(&slice).unwrap()
+    }
 
     #[test]
     fn full_round_ser_der_raw_network_message_test() {

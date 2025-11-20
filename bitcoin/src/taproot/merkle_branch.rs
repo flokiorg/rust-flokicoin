@@ -22,19 +22,27 @@ impl TaprootMerkleBranch {
     /// Returns a reference to the slice of hashes.
     #[deprecated(since = "0.32.0", note = "Use `as_slice` instead")]
     #[inline]
-    pub fn as_inner(&self) -> &[TapNodeHash] { &self.0 }
+    pub fn as_inner(&self) -> &[TapNodeHash] {
+        &self.0
+    }
 
     /// Returns a reference to the slice of hashes.
     #[inline]
-    pub fn as_slice(&self) -> &[TapNodeHash] { &self.0 }
+    pub fn as_slice(&self) -> &[TapNodeHash] {
+        &self.0
+    }
 
     /// Returns the number of nodes in this merkle proof.
     #[inline]
-    pub fn len(&self) -> usize { self.0.len() }
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
 
     /// Checks if this merkle proof is empty.
     #[inline]
-    pub fn is_empty(&self) -> bool { self.0.is_empty() }
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
 
     /// Decodes bytes from control block.
     ///
@@ -108,11 +116,15 @@ impl TaprootMerkleBranch {
     /// Returns the inner list of hashes.
     #[deprecated(since = "0.32.0", note = "Use `into_vec` instead")]
     #[inline]
-    pub fn into_inner(self) -> Vec<TapNodeHash> { self.0 }
+    pub fn into_inner(self) -> Vec<TapNodeHash> {
+        self.0
+    }
 
     /// Returns the list of hashes stored in a `Vec`.
     #[inline]
-    pub fn into_vec(self) -> Vec<TapNodeHash> { self.0 }
+    pub fn into_vec(self) -> Vec<TapNodeHash> {
+        self.0
+    }
 }
 
 macro_rules! impl_try_from {
@@ -162,7 +174,9 @@ impl_try_from_array!(
 
 impl From<TaprootMerkleBranch> for Vec<TapNodeHash> {
     #[inline]
-    fn from(branch: TaprootMerkleBranch) -> Self { branch.0 }
+    fn from(branch: TaprootMerkleBranch) -> Self {
+        branch.0
+    }
 }
 
 impl IntoIterator for TaprootMerkleBranch {
@@ -170,7 +184,9 @@ impl IntoIterator for TaprootMerkleBranch {
     type Item = TapNodeHash;
 
     #[inline]
-    fn into_iter(self) -> Self::IntoIter { IntoIter(self.0.into_iter()) }
+    fn into_iter(self) -> Self::IntoIter {
+        IntoIter(self.0.into_iter())
+    }
 }
 
 impl<'a> IntoIterator for &'a TaprootMerkleBranch {
@@ -178,7 +194,9 @@ impl<'a> IntoIterator for &'a TaprootMerkleBranch {
     type Item = &'a TapNodeHash;
 
     #[inline]
-    fn into_iter(self) -> Self::IntoIter { self.0.iter() }
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.iter()
+    }
 }
 
 impl<'a> IntoIterator for &'a mut TaprootMerkleBranch {
@@ -186,39 +204,53 @@ impl<'a> IntoIterator for &'a mut TaprootMerkleBranch {
     type Item = &'a mut TapNodeHash;
 
     #[inline]
-    fn into_iter(self) -> Self::IntoIter { self.0.iter_mut() }
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.iter_mut()
+    }
 }
 
 impl core::ops::Deref for TaprootMerkleBranch {
     type Target = [TapNodeHash];
 
     #[inline]
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 impl core::ops::DerefMut for TaprootMerkleBranch {
     #[inline]
-    fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 }
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
 }
 
 impl AsRef<[TapNodeHash]> for TaprootMerkleBranch {
     #[inline]
-    fn as_ref(&self) -> &[TapNodeHash] { &self.0 }
+    fn as_ref(&self) -> &[TapNodeHash] {
+        &self.0
+    }
 }
 
 impl AsMut<[TapNodeHash]> for TaprootMerkleBranch {
     #[inline]
-    fn as_mut(&mut self) -> &mut [TapNodeHash] { &mut self.0 }
+    fn as_mut(&mut self) -> &mut [TapNodeHash] {
+        &mut self.0
+    }
 }
 
 impl Borrow<[TapNodeHash]> for TaprootMerkleBranch {
     #[inline]
-    fn borrow(&self) -> &[TapNodeHash] { &self.0 }
+    fn borrow(&self) -> &[TapNodeHash] {
+        &self.0
+    }
 }
 
 impl BorrowMut<[TapNodeHash]> for TaprootMerkleBranch {
     #[inline]
-    fn borrow_mut(&mut self) -> &mut [TapNodeHash] { &mut self.0 }
+    fn borrow_mut(&mut self) -> &mut [TapNodeHash] {
+        &mut self.0
+    }
 }
 
 /// Iterator over node hashes within Taproot merkle branch.
@@ -230,38 +262,56 @@ pub struct IntoIter(alloc::vec::IntoIter<TapNodeHash>);
 impl IntoIter {
     /// Returns the remaining items of this iterator as a slice.
     #[inline]
-    pub fn as_slice(&self) -> &[TapNodeHash] { self.0.as_slice() }
+    pub fn as_slice(&self) -> &[TapNodeHash] {
+        self.0.as_slice()
+    }
 
     /// Returns the remaining items of this iterator as a mutable slice.
     #[inline]
-    pub fn as_mut_slice(&mut self) -> &mut [TapNodeHash] { self.0.as_mut_slice() }
+    pub fn as_mut_slice(&mut self) -> &mut [TapNodeHash] {
+        self.0.as_mut_slice()
+    }
 }
 
 impl Iterator for IntoIter {
     type Item = TapNodeHash;
 
     #[inline]
-    fn next(&mut self) -> Option<Self::Item> { self.0.next() }
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next()
+    }
 
     #[inline]
-    fn size_hint(&self) -> (usize, Option<usize>) { self.0.size_hint() }
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.0.size_hint()
+    }
 
     #[inline]
-    fn nth(&mut self, n: usize) -> Option<Self::Item> { self.0.nth(n) }
+    fn nth(&mut self, n: usize) -> Option<Self::Item> {
+        self.0.nth(n)
+    }
 
     #[inline]
-    fn last(self) -> Option<Self::Item> { self.0.last() }
+    fn last(self) -> Option<Self::Item> {
+        self.0.last()
+    }
 
     #[inline]
-    fn count(self) -> usize { self.0.count() }
+    fn count(self) -> usize {
+        self.0.count()
+    }
 }
 
 impl DoubleEndedIterator for IntoIter {
     #[inline]
-    fn next_back(&mut self) -> Option<Self::Item> { self.0.next_back() }
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.0.next_back()
+    }
 
     #[inline]
-    fn nth_back(&mut self, n: usize) -> Option<Self::Item> { self.0.nth_back(n) }
+    fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
+        self.0.nth_back(n)
+    }
 }
 
 impl ExactSizeIterator for IntoIter {}

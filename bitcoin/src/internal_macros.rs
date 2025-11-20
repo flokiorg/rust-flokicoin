@@ -55,7 +55,9 @@ macro_rules! impl_bytes_newtype {
         impl $t {
             /// Returns a reference the underlying bytes.
             #[inline]
-            pub fn as_bytes(&self) -> &[u8; $len] { &self.0 }
+            pub fn as_bytes(&self) -> &[u8; $len] {
+                &self.0
+            }
 
             /// Returns the underlying bytes.
             #[inline]
@@ -102,7 +104,9 @@ macro_rules! impl_bytes_newtype {
 
         impl core::str::FromStr for $t {
             type Err = $crate::hex::HexToArrayError;
-            fn from_str(s: &str) -> core::result::Result<Self, Self::Err> { Self::from_hex(s) }
+            fn from_str(s: &str) -> core::result::Result<Self, Self::Err> {
+                Self::from_hex(s)
+            }
         }
 
         #[cfg(feature = "serde")]

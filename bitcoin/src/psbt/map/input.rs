@@ -209,12 +209,16 @@ impl PsbtSighashType {
     ///
     /// Allows construction of a non-standard or non-valid sighash flag
     /// ([`EcdsaSighashType`], [`TapSighashType`] respectively).
-    pub fn from_u32(n: u32) -> PsbtSighashType { PsbtSighashType { inner: n } }
+    pub fn from_u32(n: u32) -> PsbtSighashType {
+        PsbtSighashType { inner: n }
+    }
 
     /// Converts [`PsbtSighashType`] to a raw `u32` sighash flag.
     ///
     /// No guarantees are made as to the standardness or validity of the returned value.
-    pub fn to_u32(self) -> u32 { self.inner }
+    pub fn to_u32(self) -> u32 {
+        self.inner
+    }
 }
 
 impl Input {

@@ -11,8 +11,8 @@
 //! This module provides the structures and functions needed to support transactions.
 //!
 
-use core::{cmp, fmt};
 use core::str::FromStr;
+use core::{cmp, fmt};
 
 use hashes::{sha256d, Hash};
 use internals::write_err;
@@ -79,13 +79,17 @@ impl OutPoint {
 
     /// Creates a new [`OutPoint`].
     #[inline]
-    pub const fn new(txid: Txid, vout: u32) -> OutPoint { OutPoint { txid, vout } }
+    pub const fn new(txid: Txid, vout: u32) -> OutPoint {
+        OutPoint { txid, vout }
+    }
 
     /// Creates a "null" `OutPoint`.
     ///
     /// This value is used for coinbase transactions because they don't have any previous outputs.
     #[inline]
-    pub fn null() -> OutPoint { OutPoint { txid: Hash::all_zeros(), vout: u32::MAX } }
+    pub fn null() -> OutPoint {
+        OutPoint { txid: Hash::all_zeros(), vout: u32::MAX }
+    }
 
     /// Checks if an `OutPoint` is "null".
     ///
@@ -103,11 +107,15 @@ impl OutPoint {
     /// assert!(tx.input[0].previous_output.is_null());
     /// ```
     #[inline]
-    pub fn is_null(&self) -> bool { *self == OutPoint::null() }
+    pub fn is_null(&self) -> bool {
+        *self == OutPoint::null()
+    }
 }
 
 impl Default for OutPoint {
-    fn default() -> Self { OutPoint::null() }
+    fn default() -> Self {
+        OutPoint::null()
+    }
 }
 
 impl fmt::Display for OutPoint {
@@ -244,7 +252,9 @@ impl TxIn {
     ///  this input then the script execution will fail [BIP-0065].
     ///
     /// [BIP-65](https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki)
-    pub fn enables_lock_time(&self) -> bool { self.sequence != Sequence::MAX }
+    pub fn enables_lock_time(&self) -> bool {
+        self.sequence != Sequence::MAX
+    }
 
     /// The weight of the TxIn when it's included in a legacy transaction (i.e., a transaction
     /// having only legacy inputs).
@@ -290,7 +300,9 @@ impl TxIn {
     /// Returns the total number of bytes that this input contributes to a transaction.
     ///
     /// Total size includes the witness data (for base size see [`Self::base_size`]).
-    pub fn total_size(&self) -> usize { self.base_size() + self.witness.size() }
+    pub fn total_size(&self) -> usize {
+        self.base_size() + self.witness.size()
+    }
 }
 
 impl Default for TxIn {
@@ -357,7 +369,9 @@ impl Sequence {
 
     /// Returns `true` if the sequence number enables absolute lock-time ([`Transaction::lock_time`]).
     #[inline]
-    pub fn enables_absolute_lock_time(&self) -> bool { *self != Sequence::MAX }
+    pub fn enables_absolute_lock_time(&self) -> bool {
+        *self != Sequence::MAX
+    }
 
     /// Returns `true` if the sequence number indicates that the transaction is finalized.
     ///
@@ -379,14 +393,18 @@ impl Sequence {
     ///
     /// [BIP-112]: <https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki>
     #[inline]
-    pub fn is_final(&self) -> bool { !self.enables_absolute_lock_time() }
+    pub fn is_final(&self) -> bool {
+        !self.enables_absolute_lock_time()
+    }
 
     /// Returns true if the transaction opted-in to BIP125 replace-by-fee.
     ///
     /// Replace by fee is signaled by the sequence being less than 0xfffffffe which is checked by
     /// this method. Note, this is the highest "non-final" value (see [`Sequence::is_final`]).
     #[inline]
-    pub fn is_rbf(&self) -> bool { *self < Sequence::MIN_NO_RBF }
+    pub fn is_rbf(&self) -> bool {
+        *self < Sequence::MIN_NO_RBF
+    }
 
     /// Returns `true` if the sequence has a relative lock-time.
     #[inline]
@@ -431,7 +449,9 @@ impl Sequence {
 
     /// Creates a relative lock-time using block height.
     #[inline]
-    pub fn from_height(height: u16) -> Self { Sequence(u32::from(height)) }
+    pub fn from_height(height: u16) -> Self {
+        Sequence(u32::from(height))
+    }
 
     /// Creates a relative lock-time using time intervals where each interval is equivalent
     /// to 512 seconds.
@@ -470,11 +490,15 @@ impl Sequence {
 
     /// Creates a sequence from a u32 value.
     #[inline]
-    pub fn from_consensus(n: u32) -> Self { Sequence(n) }
+    pub fn from_consensus(n: u32) -> Self {
+        Sequence(n)
+    }
 
     /// Returns the inner 32bit integer value of Sequence.
     #[inline]
-    pub fn to_consensus_u32(self) -> u32 { self.0 }
+    pub fn to_consensus_u32(self) -> u32 {
+        self.0
+    }
 
     /// Creates a [`relative::LockTime`] from this [`Sequence`] number.
     #[inline]
@@ -497,28 +521,40 @@ impl Sequence {
     /// Returns the low 16 bits from sequence number.
     ///
     /// BIP-68 only uses the low 16 bits for relative lock value.
-    fn low_u16(&self) -> u16 { self.0 as u16 }
+    fn low_u16(&self) -> u16 {
+        self.0 as u16
+    }
 }
 
 impl Default for Sequence {
     /// The default value of sequence is 0xffffffff.
-    fn default() -> Self { Sequence::MAX }
+    fn default() -> Self {
+        Sequence::MAX
+    }
 }
 
 impl From<Sequence> for u32 {
-    fn from(sequence: Sequence) -> u32 { sequence.0 }
+    fn from(sequence: Sequence) -> u32 {
+        sequence.0
+    }
 }
 
 impl fmt::Display for Sequence {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { fmt::Display::fmt(&self.0, f) }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(&self.0, f)
+    }
 }
 
 impl fmt::LowerHex for Sequence {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { fmt::LowerHex::fmt(&self.0, f) }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::LowerHex::fmt(&self.0, f)
+    }
 }
 
 impl fmt::UpperHex for Sequence {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { fmt::UpperHex::fmt(&self.0, f) }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::UpperHex::fmt(&self.0, f)
+    }
 }
 
 impl fmt::Debug for Sequence {
@@ -604,7 +640,9 @@ impl TxOut {
     /// Returns the total number of bytes that this output contributes to a transaction.
     ///
     /// There is no difference between base size vs total size for outputs.
-    pub fn size(&self) -> usize { size_from_script_pubkey(&self.script_pubkey) }
+    pub fn size(&self) -> usize {
+        size_from_script_pubkey(&self.script_pubkey)
+    }
 
     /// Creates a `TxOut` with given script and the smallest possible `value` that is **not** dust
     /// per current Core policy.
@@ -716,7 +754,9 @@ pub struct Transaction {
 }
 
 impl cmp::PartialOrd for Transaction {
-    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> { Some(self.cmp(other)) }
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+        Some(self.cmp(other))
+    }
 }
 impl cmp::Ord for Transaction {
     fn cmp(&self, other: &Self) -> cmp::Ordering {
@@ -740,7 +780,9 @@ impl Transaction {
         since = "0.31.0",
         note = "ntxid has been renamed to compute_ntxid to note that it's computationally expensive.  use compute_ntxid() instead."
     )]
-    pub fn ntxid(&self) -> sha256d::Hash { self.compute_ntxid() }
+    pub fn ntxid(&self) -> sha256d::Hash {
+        self.compute_ntxid()
+    }
 
     /// Computes a "normalized TXID" which does not include any signatures.
     ///
@@ -772,7 +814,9 @@ impl Transaction {
         since = "0.31.0",
         note = "txid has been renamed to compute_txid to note that it's computationally expensive.  use compute_txid() instead."
     )]
-    pub fn txid(&self) -> Txid { self.compute_txid() }
+    pub fn txid(&self) -> Txid {
+        self.compute_txid()
+    }
 
     /// Computes the [`Txid`].
     ///
@@ -796,7 +840,9 @@ impl Transaction {
         since = "0.31.0",
         note = "wtxid has been renamed to compute_wtxid to note that it's computationally expensive.  use compute_wtxid() instead."
     )]
-    pub fn wtxid(&self) -> Wtxid { self.compute_wtxid() }
+    pub fn wtxid(&self) -> Wtxid {
+        self.compute_wtxid()
+    }
 
     /// Computes the segwit version of the transaction id.
     ///
@@ -934,7 +980,9 @@ impl Transaction {
     /// Returns `true` if this transactions nLockTime is enabled ([BIP-65]).
     ///
     /// [BIP-65]: https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki
-    pub fn is_lock_time_enabled(&self) -> bool { self.input.iter().any(|i| i.enables_lock_time()) }
+    pub fn is_lock_time_enabled(&self) -> bool {
+        self.input.iter().any(|i| i.enables_lock_time())
+    }
 
     /// Returns an iterator over lengths of `script_pubkey`s in the outputs.
     ///
@@ -1100,11 +1148,15 @@ impl fmt::Display for InputsIndexError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for InputsIndexError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        Some(&self.0)
+    }
 }
 
 impl From<IndexOutOfBoundsError> for InputsIndexError {
-    fn from(e: IndexOutOfBoundsError) -> Self { Self(e) }
+    fn from(e: IndexOutOfBoundsError) -> Self {
+        Self(e)
+    }
 }
 
 /// Error attempting to do an out of bounds access on the transaction outputs vector.
@@ -1119,11 +1171,15 @@ impl fmt::Display for OutputsIndexError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for OutputsIndexError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { Some(&self.0) }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        Some(&self.0)
+    }
 }
 
 impl From<IndexOutOfBoundsError> for OutputsIndexError {
-    fn from(e: IndexOutOfBoundsError) -> Self { Self(e) }
+    fn from(e: IndexOutOfBoundsError) -> Self {
+        Self(e)
+    }
 }
 
 /// Error attempting to do an out of bounds access on a vector.
@@ -1144,7 +1200,9 @@ impl fmt::Display for IndexOutOfBoundsError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for IndexOutOfBoundsError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
 }
 
 /// The transaction version.
@@ -1169,10 +1227,14 @@ impl Version {
     pub const TWO: Self = Self(2);
 
     /// Creates a non-standard transaction version.
-    pub fn non_standard(version: i32) -> Version { Self(version) }
+    pub fn non_standard(version: i32) -> Version {
+        Self(version)
+    }
 
     /// Returns true if this transaction version number is considered standard.
-    pub fn is_standard(&self) -> bool { *self == Version::ONE || *self == Version::TWO }
+    pub fn is_standard(&self) -> bool {
+        *self == Version::ONE || *self == Version::TWO
+    }
 }
 
 impl Encodable for Version {
@@ -1188,7 +1250,9 @@ impl Decodable for Version {
 }
 
 impl fmt::Display for Version {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { fmt::Display::fmt(&self.0, f) }
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(&self.0, f)
+    }
 }
 
 impl_consensus_encoding!(TxOut, value, script_pubkey);
@@ -1311,19 +1375,27 @@ impl Decodable for Transaction {
 }
 
 impl From<Transaction> for Txid {
-    fn from(tx: Transaction) -> Txid { tx.compute_txid() }
+    fn from(tx: Transaction) -> Txid {
+        tx.compute_txid()
+    }
 }
 
 impl From<&Transaction> for Txid {
-    fn from(tx: &Transaction) -> Txid { tx.compute_txid() }
+    fn from(tx: &Transaction) -> Txid {
+        tx.compute_txid()
+    }
 }
 
 impl From<Transaction> for Wtxid {
-    fn from(tx: Transaction) -> Wtxid { tx.compute_wtxid() }
+    fn from(tx: Transaction) -> Wtxid {
+        tx.compute_wtxid()
+    }
 }
 
 impl From<&Transaction> for Wtxid {
-    fn from(tx: &Transaction) -> Wtxid { tx.compute_wtxid() }
+    fn from(tx: &Transaction) -> Wtxid {
+        tx.compute_wtxid()
+    }
 }
 
 /// Computes the value of an output accounting for the cost of spending it.
@@ -2403,7 +2475,9 @@ mod tests {
                 .unwrap(),
             )
         }
-        fn return_none(_outpoint: &OutPoint) -> Option<TxOut> { None }
+        fn return_none(_outpoint: &OutPoint) -> Option<TxOut> {
+            None
+        }
 
         for (hx, expected, spent_fn, expected_none) in tx_hexes.iter() {
             let tx_bytes = hex!(hx);

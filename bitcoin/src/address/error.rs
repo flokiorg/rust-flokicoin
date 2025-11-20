@@ -49,11 +49,15 @@ impl std::error::Error for FromScriptError {
 }
 
 impl From<witness_program::Error> for FromScriptError {
-    fn from(e: witness_program::Error) -> Self { Self::WitnessProgram(e) }
+    fn from(e: witness_program::Error) -> Self {
+        Self::WitnessProgram(e)
+    }
 }
 
 impl From<witness_version::TryFromError> for FromScriptError {
-    fn from(e: witness_version::TryFromError) -> Self { Self::WitnessVersion(e) }
+    fn from(e: witness_version::TryFromError) -> Self {
+        Self::WitnessVersion(e)
+    }
 }
 
 /// Error while generating address from a p2sh script.
@@ -100,7 +104,9 @@ impl fmt::Display for UnknownAddressTypeError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for UnknownAddressTypeError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
 }
 
 /// Address parsing error.
@@ -167,39 +173,57 @@ impl std::error::Error for ParseError {
 }
 
 impl From<base58::Error> for ParseError {
-    fn from(e: base58::Error) -> Self { Self::Base58(e) }
+    fn from(e: base58::Error) -> Self {
+        Self::Base58(e)
+    }
 }
 
 impl From<bech32::segwit::DecodeError> for ParseError {
-    fn from(e: bech32::segwit::DecodeError) -> Self { Self::Bech32(e) }
+    fn from(e: bech32::segwit::DecodeError) -> Self {
+        Self::Bech32(e)
+    }
 }
 
 impl From<witness_version::TryFromError> for ParseError {
-    fn from(e: witness_version::TryFromError) -> Self { Self::WitnessVersion(e) }
+    fn from(e: witness_version::TryFromError) -> Self {
+        Self::WitnessVersion(e)
+    }
 }
 
 impl From<witness_program::Error> for ParseError {
-    fn from(e: witness_program::Error) -> Self { Self::WitnessProgram(e) }
+    fn from(e: witness_program::Error) -> Self {
+        Self::WitnessProgram(e)
+    }
 }
 
 impl From<UnknownHrpError> for ParseError {
-    fn from(e: UnknownHrpError) -> Self { Self::UnknownHrp(e) }
+    fn from(e: UnknownHrpError) -> Self {
+        Self::UnknownHrp(e)
+    }
 }
 
 impl From<LegacyAddressTooLongError> for ParseError {
-    fn from(e: LegacyAddressTooLongError) -> Self { Self::LegacyAddressTooLong(e) }
+    fn from(e: LegacyAddressTooLongError) -> Self {
+        Self::LegacyAddressTooLong(e)
+    }
 }
 
 impl From<InvalidBase58PayloadLengthError> for ParseError {
-    fn from(e: InvalidBase58PayloadLengthError) -> Self { Self::InvalidBase58PayloadLength(e) }
+    fn from(e: InvalidBase58PayloadLengthError) -> Self {
+        Self::InvalidBase58PayloadLength(e)
+    }
 }
 
 impl From<InvalidLegacyPrefixError> for ParseError {
-    fn from(e: InvalidLegacyPrefixError) -> Self { Self::InvalidLegacyPrefix(e) }
+    fn from(e: InvalidLegacyPrefixError) -> Self {
+        Self::InvalidLegacyPrefix(e)
+    }
 }
 
 impl From<NetworkValidationError> for ParseError {
-    fn from(e: NetworkValidationError) -> Self { Self::NetworkValidation(e) }
+    fn from(e: NetworkValidationError) -> Self {
+        Self::NetworkValidation(e)
+    }
 }
 
 /// Unknown HRP error.
@@ -208,12 +232,16 @@ impl From<NetworkValidationError> for ParseError {
 pub struct UnknownHrpError(pub String);
 
 impl fmt::Display for UnknownHrpError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { write!(f, "unknown hrp: {}", self.0) }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "unknown hrp: {}", self.0)
+    }
 }
 
 #[cfg(feature = "std")]
 impl std::error::Error for UnknownHrpError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
 }
 
 /// Address's network differs from required one.
@@ -245,7 +273,9 @@ pub struct InvalidBase58PayloadLengthError {
 
 impl InvalidBase58PayloadLengthError {
     /// Returns the invalid payload length.
-    pub fn invalid_base58_payload_length(&self) -> usize { self.length }
+    pub fn invalid_base58_payload_length(&self) -> usize {
+        self.length
+    }
 }
 
 impl fmt::Display for InvalidBase58PayloadLengthError {
@@ -266,7 +296,9 @@ pub struct LegacyAddressTooLongError {
 
 impl LegacyAddressTooLongError {
     /// Returns the invalid legacy address length.
-    pub fn invalid_legcay_address_length(&self) -> usize { self.length }
+    pub fn invalid_legcay_address_length(&self) -> usize {
+        self.length
+    }
 }
 
 impl fmt::Display for LegacyAddressTooLongError {
@@ -287,7 +319,9 @@ pub struct InvalidLegacyPrefixError {
 
 impl InvalidLegacyPrefixError {
     /// Returns the invalid prefix.
-    pub fn invalid_legacy_address_prefix(&self) -> u8 { self.invalid }
+    pub fn invalid_legacy_address_prefix(&self) -> u8 {
+        self.invalid
+    }
 }
 
 impl fmt::Display for InvalidLegacyPrefixError {

@@ -183,11 +183,15 @@ impl LockTime {
 
     /// Returns true if this lock time value is a block height.
     #[inline]
-    pub const fn is_block_height(&self) -> bool { matches!(*self, LockTime::Blocks(_)) }
+    pub const fn is_block_height(&self) -> bool {
+        matches!(*self, LockTime::Blocks(_))
+    }
 
     /// Returns true if this lock time value is a block time (UNIX timestamp).
     #[inline]
-    pub const fn is_block_time(&self) -> bool { !self.is_block_height() }
+    pub const fn is_block_time(&self) -> bool {
+        !self.is_block_height()
+    }
 
     /// Returns true if this timelock constraint is satisfied by the respective `height`/`time`.
     ///
@@ -320,12 +324,16 @@ impl TryFrom<Box<str>> for LockTime {
 
 impl From<Height> for LockTime {
     #[inline]
-    fn from(h: Height) -> Self { LockTime::Blocks(h) }
+    fn from(h: Height) -> Self {
+        LockTime::Blocks(h)
+    }
 }
 
 impl From<Time> for LockTime {
     #[inline]
-    fn from(t: Time) -> Self { LockTime::Seconds(t) }
+    fn from(t: Time) -> Self {
+        LockTime::Seconds(t)
+    }
 }
 
 impl PartialOrd for LockTime {
@@ -404,7 +412,9 @@ impl<'de> serde::Deserialize<'de> for LockTime {
         struct Visitor;
         impl<'de> serde::de::Visitor<'de> for Visitor {
             type Value = u32;
-            fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result { f.write_str("a u32") }
+            fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                f.write_str("a u32")
+            }
             // We cannot just implement visit_u32 because JSON (among other things) always
             // calls visit_u64, even when called from Deserializer::deserialize_u32. The
             // other visit_u*s have default implementations that forward to visit_u64.

@@ -101,11 +101,15 @@ impl LockTime {
 
     /// Encodes the locktime as a sequence number.
     #[inline]
-    pub fn to_sequence(&self) -> Sequence { Sequence::from_consensus(self.to_consensus_u32()) }
+    pub fn to_sequence(&self) -> Sequence {
+        Sequence::from_consensus(self.to_consensus_u32())
+    }
 
     /// Constructs a `LockTime` from `n`, expecting `n` to be a 16-bit count of blocks.
     #[inline]
-    pub const fn from_height(n: u16) -> Self { LockTime::Blocks(Height::from_height(n)) }
+    pub const fn from_height(n: u16) -> Self {
+        LockTime::Blocks(Height::from_height(n))
+    }
 
     /// Constructs a `LockTime` from `n`, expecting `n` to be a count of 512-second intervals.
     ///
@@ -155,11 +159,15 @@ impl LockTime {
 
     /// Returns true if this lock time value is in units of block height.
     #[inline]
-    pub const fn is_block_height(&self) -> bool { matches!(*self, LockTime::Blocks(_)) }
+    pub const fn is_block_height(&self) -> bool {
+        matches!(*self, LockTime::Blocks(_))
+    }
 
     /// Returns true if this lock time value is in units of time.
     #[inline]
-    pub const fn is_block_time(&self) -> bool { !self.is_block_height() }
+    pub const fn is_block_time(&self) -> bool {
+        !self.is_block_height()
+    }
 
     /// Returns true if this [`relative::LockTime`] is satisfied by either height or time.
     ///
@@ -302,12 +310,16 @@ impl LockTime {
 
 impl From<Height> for LockTime {
     #[inline]
-    fn from(h: Height) -> Self { LockTime::Blocks(h) }
+    fn from(h: Height) -> Self {
+        LockTime::Blocks(h)
+    }
 }
 
 impl From<Time> for LockTime {
     #[inline]
-    fn from(t: Time) -> Self { LockTime::Time(t) }
+    fn from(t: Time) -> Self {
+        LockTime::Time(t)
+    }
 }
 
 impl PartialOrd for LockTime {
@@ -363,7 +375,9 @@ impl convert::TryFrom<Sequence> for LockTime {
 }
 
 impl From<LockTime> for Sequence {
-    fn from(lt: LockTime) -> Sequence { lt.to_sequence() }
+    fn from(lt: LockTime) -> Sequence {
+        lt.to_sequence()
+    }
 }
 
 /// Error returned when a sequence number is parsed as a lock time, but its
@@ -374,7 +388,9 @@ pub struct DisabledLockTimeError(u32);
 impl DisabledLockTimeError {
     /// Accessor for the `u32` whose "disable" flag was set, preventing
     /// it from being parsed as a relative locktime.
-    pub fn disabled_locktime_value(&self) -> u32 { self.0 }
+    pub fn disabled_locktime_value(&self) -> u32 {
+        self.0
+    }
 }
 
 impl fmt::Display for DisabledLockTimeError {

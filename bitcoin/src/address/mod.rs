@@ -232,7 +232,9 @@ impl KnownHrp {
 }
 
 impl From<Network> for KnownHrp {
-    fn from(n: Network) -> Self { Self::from_network(n) }
+    fn from(n: Network) -> Self {
+        Self::from_network(n)
+    }
 }
 
 /// The data encoded by an `Address`.
@@ -245,17 +247,17 @@ pub enum AddressData {
     /// Data encoded by a P2PKH address.
     P2pkh {
         /// The pubkey hash used to encumber outputs to this address.
-        pubkey_hash: PubkeyHash
+        pubkey_hash: PubkeyHash,
     },
     /// Data encoded by a P2SH address.
     P2sh {
         /// The script hash used to encumber outputs to this address.
-        script_hash: ScriptHash
+        script_hash: ScriptHash,
     },
     /// Data encoded by a Segwit address.
     Segwit {
         /// The witness program used to encumber outputs to this address.
-        witness_program: WitnessProgram
+        witness_program: WitnessProgram,
     },
 }
 
@@ -359,7 +361,9 @@ struct DisplayUnchecked<'a, N: NetworkValidation>(&'a Address<N>);
 
 #[cfg(feature = "serde")]
 impl<N: NetworkValidation> fmt::Display for DisplayUnchecked<'_, N> {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result { fmt::Display::fmt(&self.0 .0, fmt) }
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(&self.0 .0, fmt)
+    }
 }
 
 #[cfg(feature = "serde")]
@@ -384,7 +388,9 @@ impl<V: NetworkValidation> Address<V> {
     }
 
     /// Marks the network of this address as unchecked.
-    pub fn into_unchecked(self) -> Address<NetworkUnchecked> { Address(self.0, PhantomData) }
+    pub fn into_unchecked(self) -> Address<NetworkUnchecked> {
+        Address(self.0, PhantomData)
+    }
 }
 
 /// Methods and functions that can be called only on `Address<NetworkChecked>`.
@@ -489,7 +495,7 @@ impl Address {
         match self.0 {
             AddressInner::P2pkh { .. } => Some(AddressType::P2pkh),
             AddressInner::P2sh { .. } => Some(AddressType::P2sh),
-            AddressInner::Segwit { ref program, hrp: _ } =>
+            AddressInner::Segwit { ref program, hrp: _ } => {
                 if program.is_p2wpkh() {
                     Some(AddressType::P2wpkh)
                 } else if program.is_p2wsh() {
@@ -498,7 +504,8 @@ impl Address {
                     Some(AddressType::P2tr)
                 } else {
                     None
-                },
+                }
+            }
         }
     }
 
@@ -556,10 +563,15 @@ impl Address {
     /// considered non-standard.
     /// </details>
     ///
-    pub fn is_spend_standard(&self) -> bool { self.address_type().is_some() }
+    pub fn is_spend_standard(&self) -> bool {
+        self.address_type().is_some()
+    }
 
     /// Constructs an [`Address`] from an output script (`scriptPubkey`).
-    pub fn from_script(script: &Script, params: impl AsRef<Params>) -> Result<Address, FromScriptError> {
+    pub fn from_script(
+        script: &Script,
+        params: impl AsRef<Params>,
+    ) -> Result<Address, FromScriptError> {
         let network = params.as_ref().network;
         if script.is_p2pkh() {
             let bytes = script.as_bytes()[3..23].try_into().expect("statically 20B long");
@@ -621,7 +633,9 @@ impl Address {
     /// # })().unwrap();
     /// # assert_eq!(writer, ADDRESS);
     /// ```
-    pub fn to_qr_uri(&self) -> String { format!("bitcoin:{:#}", self) }
+    pub fn to_qr_uri(&self) -> String {
+        format!("bitcoin:{:#}", self)
+    }
 
     /// Returns true if the given pubkey is directly related to the address payload.
     ///
@@ -651,12 +665,15 @@ impl Address {
     pub fn matches_script_pubkey(&self, script: &Script) -> bool {
         use AddressInner::*;
         match self.0 {
-            P2pkh { ref hash, network: _ } if script.is_p2pkh() =>
-                &script.as_bytes()[3..23] == <PubkeyHash as AsRef<[u8; 20]>>::as_ref(hash),
-            P2sh { ref hash, network: _ } if script.is_p2sh() =>
-                &script.as_bytes()[2..22] == <ScriptHash as AsRef<[u8; 20]>>::as_ref(hash),
-            Segwit { ref program, hrp: _ } if script.is_witness_program() =>
-                &script.as_bytes()[2..] == program.program().as_bytes(),
+            P2pkh { ref hash, network: _ } if script.is_p2pkh() => {
+                &script.as_bytes()[3..23] == <PubkeyHash as AsRef<[u8; 20]>>::as_ref(hash)
+            }
+            P2sh { ref hash, network: _ } if script.is_p2sh() => {
+                &script.as_bytes()[2..22] == <ScriptHash as AsRef<[u8; 20]>>::as_ref(hash)
+            }
+            Segwit { ref program, hrp: _ } if script.is_witness_program() => {
+                &script.as_bytes()[2..] == program.program().as_bytes()
+            }
             P2pkh { .. } | P2sh { .. } | Segwit { .. } => false,
         }
     }
@@ -776,17 +793,23 @@ impl Address<NetworkUnchecked> {
     /// For details about this mechanism, see section [*Parsing addresses*](Address#parsing-addresses)
     /// on [`Address`].
     #[inline]
-    pub fn assume_checked(self) -> Address { Address(self.0, PhantomData) }
+    pub fn assume_checked(self) -> Address {
+        Address(self.0, PhantomData)
+    }
 }
 
 impl From<Address> for script::ScriptBuf {
-    fn from(a: Address) -> Self { a.script_pubkey() }
+    fn from(a: Address) -> Self {
+        a.script_pubkey()
+    }
 }
 
 // Alternate formatting `{:#}` is used to return uppercase version of bech32 addresses which should
 // be used in QR codes, see [`Address::to_qr_uri`].
 impl fmt::Display for Address {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result { fmt::Display::fmt(&self.0, fmt) }
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(&self.0, fmt)
+    }
 }
 
 impl<V: NetworkValidation> fmt::Debug for Address<V> {

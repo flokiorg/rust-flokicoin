@@ -19,13 +19,19 @@ pub struct Builder(ScriptBuf, Option<Opcode>);
 impl Builder {
     /// Creates a new empty script.
     #[inline]
-    pub const fn new() -> Self { Builder(ScriptBuf::new(), None) }
+    pub const fn new() -> Self {
+        Builder(ScriptBuf::new(), None)
+    }
 
     /// Returns the length in bytes of the script.
-    pub fn len(&self) -> usize { self.0.len() }
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
 
     /// Checks whether the script is the empty script.
-    pub fn is_empty(&self) -> bool { self.0.is_empty() }
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
 
     /// Adds instructions to push an integer onto the stack.
     ///
@@ -116,20 +122,30 @@ impl Builder {
     }
 
     /// Converts the `Builder` into `ScriptBuf`.
-    pub fn into_script(self) -> ScriptBuf { self.0 }
+    pub fn into_script(self) -> ScriptBuf {
+        self.0
+    }
 
     /// Converts the `Builder` into script bytes
-    pub fn into_bytes(self) -> Vec<u8> { self.0.into() }
+    pub fn into_bytes(self) -> Vec<u8> {
+        self.0.into()
+    }
 
     /// Returns the internal script
-    pub fn as_script(&self) -> &Script { &self.0 }
+    pub fn as_script(&self) -> &Script {
+        &self.0
+    }
 
     /// Returns script bytes
-    pub fn as_bytes(&self) -> &[u8] { self.0.as_bytes() }
+    pub fn as_bytes(&self) -> &[u8] {
+        self.0.as_bytes()
+    }
 }
 
 impl Default for Builder {
-    fn default() -> Builder { Builder::new() }
+    fn default() -> Builder {
+        Builder::new()
+    }
 }
 
 /// Creates a new builder from an existing vector.
@@ -142,7 +158,9 @@ impl From<Vec<u8>> for Builder {
 }
 
 impl fmt::Display for Builder {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { self.0.fmt_asm(f) }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.0.fmt_asm(f)
+    }
 }
 
 internals::debug_from_display!(Builder);

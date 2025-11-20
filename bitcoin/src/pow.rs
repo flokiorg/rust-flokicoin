@@ -19,7 +19,9 @@ use crate::block::Header;
 use crate::blockdata::block::BlockHash;
 use crate::consensus::encode::{self, Decodable, Encodable};
 use crate::consensus::Params;
-use crate::error::{ContainsPrefixError, MissingPrefixError, ParseIntError, PrefixedHexError, UnprefixedHexError};
+use crate::error::{
+    ContainsPrefixError, MissingPrefixError, ParseIntError, PrefixedHexError, UnprefixedHexError,
+};
 
 /// Implement traits and methods shared by `Target` and `Work`.
 macro_rules! do_impl {
@@ -43,25 +45,33 @@ macro_rules! do_impl {
             #[doc = stringify!($ty)]
             #[doc = "` from a big-endian byte array."]
             #[inline]
-            pub fn from_be_bytes(bytes: [u8; 32]) -> $ty { $ty(U256::from_be_bytes(bytes)) }
+            pub fn from_be_bytes(bytes: [u8; 32]) -> $ty {
+                $ty(U256::from_be_bytes(bytes))
+            }
 
             #[doc = "Creates `"]
             #[doc = stringify!($ty)]
             #[doc = "` from a little-endian byte array."]
             #[inline]
-            pub fn from_le_bytes(bytes: [u8; 32]) -> $ty { $ty(U256::from_le_bytes(bytes)) }
+            pub fn from_le_bytes(bytes: [u8; 32]) -> $ty {
+                $ty(U256::from_le_bytes(bytes))
+            }
 
             #[doc = "Converts `"]
             #[doc = stringify!($ty)]
             #[doc = "` to a big-endian byte array."]
             #[inline]
-            pub fn to_be_bytes(self) -> [u8; 32] { self.0.to_be_bytes() }
+            pub fn to_be_bytes(self) -> [u8; 32] {
+                self.0.to_be_bytes()
+            }
 
             #[doc = "Converts `"]
             #[doc = stringify!($ty)]
             #[doc = "` to a little-endian byte array."]
             #[inline]
-            pub fn to_le_bytes(self) -> [u8; 32] { self.0.to_le_bytes() }
+            pub fn to_le_bytes(self) -> [u8; 32] {
+                self.0.to_le_bytes()
+            }
         }
 
         impl fmt::Display for $ty {
@@ -97,7 +107,9 @@ pub struct Work(U256);
 
 impl Work {
     /// Converts this [`Work`] to [`Target`].
-    pub fn to_target(self) -> Target { Target(self.0.inverse()) }
+    pub fn to_target(self) -> Target {
+        Target(self.0.inverse())
+    }
 
     /// Returns log2 of this work.
     ///
@@ -105,18 +117,24 @@ impl Work {
     /// used mainly for informative and displaying purposes, similarly to Bitcoin Core's
     /// `log2_work` output in its logs.
     #[cfg(feature = "std")]
-    pub fn log2(self) -> f64 { self.0.to_f64().log2() }
+    pub fn log2(self) -> f64 {
+        self.0.to_f64().log2()
+    }
 }
 do_impl!(Work);
 
 impl Add for Work {
     type Output = Work;
-    fn add(self, rhs: Self) -> Self { Work(self.0 + rhs.0) }
+    fn add(self, rhs: Self) -> Self {
+        Work(self.0 + rhs.0)
+    }
 }
 
 impl Sub for Work {
     type Output = Work;
-    fn sub(self, rhs: Self) -> Self { Work(self.0 - rhs.0) }
+    fn sub(self, rhs: Self) -> Self {
+        Work(self.0 - rhs.0)
+    }
 }
 
 /// A 256 bit integer representing target.
@@ -149,7 +167,7 @@ impl Target {
     ///
     /// Not all target values are attainable because consensus code uses the compact format to
     /// represent targets (see [`CompactTarget`]).
-       /// Matches the Flokicoin mainnet pow limit (2^240 - 1).
+    /// Matches the Flokicoin mainnet pow limit (2^240 - 1).
     pub const MAX_ATTAINABLE_MAINNET: Self = Target(U256(
         0xffff_ffff_ffff_ffff_ffff_ffff_ffffu128,
         0xffff_ffff_ffff_ffff_ffff_ffff_ffff_ffff,
@@ -244,7 +262,9 @@ impl Target {
     /// "Work" is defined as the work done to mine a block with this target value (recorded in the
     /// block header in compact form as nBits). This is not the same as the difficulty to mine a
     /// block with this target (see `Self::difficulty`).
-    pub fn to_work(self) -> Work { Work(self.0.inverse()) }
+    pub fn to_work(self) -> Work {
+        Work(self.0.inverse())
+    }
 
     /// Computes the popular "difficulty" measure for mining.
     ///
@@ -290,12 +310,16 @@ impl Target {
     ///
     /// [`difficulty`]: Target::difficulty
     #[cfg_attr(all(test, mutate), mutate)]
-    pub fn difficulty_float(&self) -> f64 { TARGET_MAX_F64 / self.0.to_f64() }
+    pub fn difficulty_float(&self) -> f64 {
+        TARGET_MAX_F64 / self.0.to_f64()
+    }
 
     /// Computes the minimum valid [`Target`] threshold allowed for a block in which a difficulty
     /// adjustment occurs.
     #[deprecated(since = "0.32.0", note = "use min_transition_threshold instead")]
-    pub fn min_difficulty_transition_threshold(&self) -> Self { self.min_transition_threshold() }
+    pub fn min_difficulty_transition_threshold(&self) -> Self {
+        self.min_transition_threshold()
+    }
 
     /// Computes the maximum valid [`Target`] threshold allowed for a block in which a difficulty
     /// adjustment occurs.
@@ -313,7 +337,9 @@ impl Target {
     /// # Returns
     ///
     /// In line with Bitcoin Core this function may return a target value of zero.
-    pub fn min_transition_threshold(&self) -> Self { Self(self.0 >> 2) }
+    pub fn min_transition_threshold(&self) -> Self {
+        Self(self.0 >> 2)
+    }
 
     /// Computes the maximum valid [`Target`] threshold allowed for a block in which a difficulty
     /// adjustment occurs.
@@ -340,7 +366,9 @@ impl Target {
     ///
     /// The return value should be checked against [`Params::max_attainable_target`] or use one of
     /// the `Target::MAX_ATTAINABLE_FOO` constants.
-    pub fn max_transition_threshold_unchecked(&self) -> Self { Self(self.0 << 2) }
+    pub fn max_transition_threshold_unchecked(&self) -> Self {
+        Self(self.0 << 2)
+    }
 }
 do_impl!(Target);
 
@@ -457,14 +485,20 @@ impl CompactTarget {
     }
 
     /// Creates a [`CompactTarget`] from a consensus encoded `u32`.
-    pub fn from_consensus(bits: u32) -> Self { Self(bits) }
+    pub fn from_consensus(bits: u32) -> Self {
+        Self(bits)
+    }
 
     /// Returns the consensus encoded `u32` representation of this [`CompactTarget`].
-    pub fn to_consensus(self) -> u32 { self.0 }
+    pub fn to_consensus(self) -> u32 {
+        self.0
+    }
 }
 
 impl From<CompactTarget> for Target {
-    fn from(c: CompactTarget) -> Self { Target::from_compact(c) }
+    fn from(c: CompactTarget) -> Self {
+        Target::from_compact(c)
+    }
 }
 
 impl Encodable for CompactTarget {
@@ -483,12 +517,16 @@ impl Decodable for CompactTarget {
 
 impl LowerHex for CompactTarget {
     #[inline]
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { LowerHex::fmt(&self.0, f) }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        LowerHex::fmt(&self.0, f)
+    }
 }
 
 impl UpperHex for CompactTarget {
     #[inline]
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { UpperHex::fmt(&self.0, f) }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        UpperHex::fmt(&self.0, f)
+    }
 }
 
 /// Big-endian 256 bit integer type.
@@ -603,22 +641,34 @@ impl U256 {
     }
 
     #[cfg_attr(all(test, mutate), mutate)]
-    fn is_zero(&self) -> bool { self.0 == 0 && self.1 == 0 }
+    fn is_zero(&self) -> bool {
+        self.0 == 0 && self.1 == 0
+    }
 
     #[cfg_attr(all(test, mutate), mutate)]
-    fn is_one(&self) -> bool { self.0 == 0 && self.1 == 1 }
+    fn is_one(&self) -> bool {
+        self.0 == 0 && self.1 == 1
+    }
 
     #[cfg_attr(all(test, mutate), mutate)]
-    fn is_max(&self) -> bool { self.0 == u128::MAX && self.1 == u128::MAX }
+    fn is_max(&self) -> bool {
+        self.0 == u128::MAX && self.1 == u128::MAX
+    }
 
     /// Returns the low 32 bits.
-    fn low_u32(&self) -> u32 { self.low_u128() as u32 }
+    fn low_u32(&self) -> u32 {
+        self.low_u128() as u32
+    }
 
     /// Returns the low 64 bits.
-    fn low_u64(&self) -> u64 { self.low_u128() as u64 }
+    fn low_u64(&self) -> u64 {
+        self.low_u128() as u64
+    }
 
     /// Returns the low 128 bits.
-    fn low_u128(&self) -> u128 { self.1 }
+    fn low_u128(&self) -> u128 {
+        self.1
+    }
 
     /// Returns this `U256` as a `u128` saturating to `u128::MAX` if `self` is too big.
     // Matagen gives false positive because >= and > both return u128::MAX
@@ -934,7 +984,9 @@ impl U256 {
 const TARGET_MAX_F64: f64 = 1.7668201048317172e72;
 
 impl<T: Into<u128>> From<T> for U256 {
-    fn from(x: T) -> Self { U256(0, x.into()) }
+    fn from(x: T) -> Self {
+        U256(0, x.into())
+    }
 }
 
 impl Add for U256 {
@@ -966,28 +1018,38 @@ impl Mul for U256 {
 
 impl Div for U256 {
     type Output = Self;
-    fn div(self, rhs: Self) -> Self { self.div_rem(rhs).0 }
+    fn div(self, rhs: Self) -> Self {
+        self.div_rem(rhs).0
+    }
 }
 
 impl Rem for U256 {
     type Output = Self;
-    fn rem(self, rhs: Self) -> Self { self.div_rem(rhs).1 }
+    fn rem(self, rhs: Self) -> Self {
+        self.div_rem(rhs).1
+    }
 }
 
 impl Not for U256 {
     type Output = Self;
 
-    fn not(self) -> Self { U256(!self.0, !self.1) }
+    fn not(self) -> Self {
+        U256(!self.0, !self.1)
+    }
 }
 
 impl Shl<u32> for U256 {
     type Output = Self;
-    fn shl(self, shift: u32) -> U256 { self.wrapping_shl(shift) }
+    fn shl(self, shift: u32) -> U256 {
+        self.wrapping_shl(shift)
+    }
 }
 
 impl Shr<u32> for U256 {
     type Output = Self;
-    fn shr(self, shift: u32) -> U256 { self.wrapping_shr(shift) }
+    fn shr(self, shift: u32) -> U256 {
+        self.wrapping_shr(shift)
+    }
 }
 
 impl fmt::Display for U256 {
@@ -1001,7 +1063,9 @@ impl fmt::Display for U256 {
 }
 
 impl fmt::Debug for U256 {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { write!(f, "{:#x}", self) }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:#x}", self)
+    }
 }
 
 macro_rules! impl_hex {
@@ -1025,7 +1089,9 @@ impl crate::serde::Serialize for U256 {
         struct DisplayHex(U256);
 
         impl fmt::Display for DisplayHex {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { write!(f, "{:x}", self.0) }
+            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                write!(f, "{:x}", self.0)
+            }
         }
 
         if serializer.is_human_readable() {
@@ -1133,11 +1199,15 @@ mod tests {
     use super::*;
 
     impl<T: Into<u128>> From<T> for Target {
-        fn from(x: T) -> Self { Self(U256::from(x)) }
+        fn from(x: T) -> Self {
+            Self(U256::from(x))
+        }
     }
 
     impl<T: Into<u128>> From<T> for Work {
-        fn from(x: T) -> Self { Self(U256::from(x)) }
+        fn from(x: T) -> Self {
+            Self(U256::from(x))
+        }
     }
 
     impl U256 {
@@ -1825,9 +1895,11 @@ mod tests {
             merkle_root: TxMerkleNode::all_zeros(),
             time: 1599332177,
             bits: epoch_start.bits,
-            nonce: epoch_start.nonce
+            nonce: epoch_start.nonce,
+            aux_pow: None,
         };
-        let adjustment = CompactTarget::from_header_difficulty_adjustment(epoch_start, current, params);
+        let adjustment =
+            CompactTarget::from_header_difficulty_adjustment(epoch_start, current, params);
         let adjustment_bits = CompactTarget::from_consensus(503394215); // Block 2016 compact target
         assert_eq!(adjustment, adjustment_bits);
     }
@@ -1838,14 +1910,15 @@ mod tests {
         use hashes::Hash;
         let params = Params::new(crate::Network::Signet);
         let starting_bits = CompactTarget::from_consensus(503394215); // Block 2016 compact target
-        // Block 2016, the only information used is `time`
+                                                                      // Block 2016, the only information used is `time`
         let epoch_start = Header {
             version: Version::ONE,
             prev_blockhash: BlockHash::all_zeros(),
             merkle_root: TxMerkleNode::all_zeros(),
             time: 1599332844,
             bits: starting_bits,
-            nonce: 0
+            nonce: 0,
+            aux_pow: None,
         };
         // Block 4031, the only information used are `bits` and `time`
         let current = Header {
@@ -1854,9 +1927,11 @@ mod tests {
             merkle_root: TxMerkleNode::all_zeros(),
             time: 1600591200,
             bits: starting_bits,
-            nonce: 0
+            nonce: 0,
+            aux_pow: None,
         };
-        let adjustment = CompactTarget::from_header_difficulty_adjustment(epoch_start, current, params);
+        let adjustment =
+            CompactTarget::from_header_difficulty_adjustment(epoch_start, current, params);
         let adjustment_bits = CompactTarget::from_consensus(503397348); // Block 4032 compact target
         assert_eq!(adjustment, adjustment_bits);
     }
@@ -1867,9 +1942,8 @@ mod tests {
         let starting_bits = CompactTarget::from_consensus(503403001);
         let timespan = (0.2 * params.pow_target_timespan as f64) as u64;
         let got = CompactTarget::from_next_work_required(starting_bits, timespan, params);
-        let want = Target::from_compact(starting_bits)
-            .min_transition_threshold()
-            .to_compact_lossy();
+        let want =
+            Target::from_compact(starting_bits).min_transition_threshold().to_compact_lossy();
         assert_eq!(got, want);
     }
 
@@ -1877,11 +1951,10 @@ mod tests {
     fn compact_target_from_minimum_downward_difficulty_adjustment() {
         let params = Params::new(crate::Network::Signet);
         let starting_bits = CompactTarget::from_consensus(403403001); // High difficulty for Signet
-        let timespan =  5 * params.pow_target_timespan; // Really slow.
+        let timespan = 5 * params.pow_target_timespan; // Really slow.
         let got = CompactTarget::from_next_work_required(starting_bits, timespan, &params);
-        let want = Target::from_compact(starting_bits)
-            .max_transition_threshold(params)
-            .to_compact_lossy();
+        let want =
+            Target::from_compact(starting_bits).max_transition_threshold(params).to_compact_lossy();
         assert_eq!(got, want);
     }
 
@@ -1889,7 +1962,7 @@ mod tests {
     fn compact_target_from_adjustment_is_max_target() {
         let params = Params::new(crate::Network::Signet);
         let starting_bits = CompactTarget::from_consensus(503543726); // Genesis compact target on Signet
-        let timespan =  5 * params.pow_target_timespan; // Really slow.
+        let timespan = 5 * params.pow_target_timespan; // Really slow.
         let got = CompactTarget::from_next_work_required(starting_bits, timespan, &params);
         let want = params.max_attainable_target.to_compact_lossy();
         assert_eq!(got, want);
@@ -2039,27 +2112,37 @@ mod tests {
     #[test]
     #[cfg(debug_assertions)]
     #[should_panic]
-    fn u256_overflowing_addition_panics() { let _ = U256::MAX + U256::ONE; }
+    fn u256_overflowing_addition_panics() {
+        let _ = U256::MAX + U256::ONE;
+    }
 
     #[test]
     #[cfg(debug_assertions)]
     #[should_panic]
-    fn u256_overflowing_subtraction_panics() { let _ = U256::ZERO - U256::ONE; }
+    fn u256_overflowing_subtraction_panics() {
+        let _ = U256::ZERO - U256::ONE;
+    }
 
     #[test]
     #[cfg(debug_assertions)]
     #[should_panic]
-    fn u256_multiplication_by_max_panics() { let _ = U256::MAX * U256::MAX; }
+    fn u256_multiplication_by_max_panics() {
+        let _ = U256::MAX * U256::MAX;
+    }
 
     #[test]
     #[cfg(debug_assertions)]
     #[should_panic]
-    fn work_overflowing_addition_panics() { let _ = Work(U256::MAX) + Work(U256::ONE); }
+    fn work_overflowing_addition_panics() {
+        let _ = Work(U256::MAX) + Work(U256::ONE);
+    }
 
     #[test]
     #[cfg(debug_assertions)]
     #[should_panic]
-    fn work_overflowing_subtraction_panics() { let _ = Work(U256::ZERO) - Work(U256::ONE); }
+    fn work_overflowing_subtraction_panics() {
+        let _ = Work(U256::ZERO) - Work(U256::ONE);
+    }
 
     #[test]
     fn u256_to_f64() {
