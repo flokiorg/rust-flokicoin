@@ -8,10 +8,10 @@
 //! these blocks and the blockchain.
 //!
 
-use core::fmt;
+use core::{convert::TryFrom, fmt};
 
 use hashes::{sha256d, Hash, HashEngine};
-use io::{Read, Write};
+use io::{ErrorKind, Read, Write};
 use scrypt::{scrypt, Params as ScryptParams};
 
 use super::Weight;
@@ -38,11 +38,15 @@ impl_hashencode!(TxMerkleNode);
 impl_hashencode!(WitnessMerkleNode);
 
 impl From<Txid> for TxMerkleNode {
-    fn from(txid: Txid) -> Self { Self::from_byte_array(txid.to_byte_array()) }
+    fn from(txid: Txid) -> Self {
+        Self::from_byte_array(txid.to_byte_array())
+    }
 }
 
 impl From<Wtxid> for WitnessMerkleNode {
-    fn from(wtxid: Wtxid) -> Self { Self::from_byte_array(wtxid.to_byte_array()) }
+    fn from(wtxid: Wtxid) -> Self {
+        Self::from_byte_array(wtxid.to_byte_array())
+    }
 }
 
 /// Bitcoin block header.
@@ -55,7 +59,7 @@ impl From<Wtxid> for WitnessMerkleNode {
 /// ### Bitcoin Core References
 ///
 /// * [CBlockHeader definition](https://github.com/bitcoin/bitcoin/blob/345457b542b6a980ccfbc868af0970a6f91d1b82/src/primitives/block.h#L20)
-#[derive(Copy, PartialEq, Eq, Clone, PartialOrd, Ord, Hash)]
+#[derive(PartialEq, Eq, Clone, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(crate = "actual_serde"))]
 pub struct Header {
@@ -71,19 +75,52 @@ pub struct Header {
     pub bits: CompactTarget,
     /// The nonce, selected to obtain a low enough blockhash.
     pub nonce: u32,
+    /// Optional AuxPoW payload when merge-mining is in use.
+    #[cfg_attr(feature = "serde", serde(default, skip_serializing_if = "Option::is_none"))]
+    pub aux_pow: Option<AuxPow>,
 }
 
-impl_consensus_encoding!(Header, version, prev_blockhash, merkle_root, time, bits, nonce);
-
 impl Header {
-    /// The number of bytes that the block header contributes to the size of a block.
-    // Serialized length of fields (version, prev_blockhash, merkle_root, time, bits, nonce)
+    /// The number of bytes that the base block header contributes to the size of a block.
+    /// This covers only the 80-byte header fields and excludes any AuxPoW payload.
     pub const SIZE: usize = 4 + 32 + 32 + 4 + 4 + 4; // 80
+
+    /// Full serialized size including AuxPoW payload (if present).
+    pub fn serialized_size(&self) -> usize {
+        if self.version.has_aux_pow() {
+            encode::serialize(self).len()
+        } else {
+            Self::SIZE
+        }
+    }
+
+    fn consensus_encode_base<W: Write + ?Sized>(&self, w: &mut W) -> Result<usize, io::Error> {
+        let mut len = 0;
+        len += self.version.consensus_encode(w)?;
+        len += self.prev_blockhash.consensus_encode(w)?;
+        len += self.merkle_root.consensus_encode(w)?;
+        len += self.time.consensus_encode(w)?;
+        len += self.bits.consensus_encode(w)?;
+        len += self.nonce.consensus_encode(w)?;
+        Ok(len)
+    }
+
+    fn serialize_base(&self) -> Vec<u8> {
+        let mut buf = Vec::with_capacity(Self::SIZE);
+        let len = self.consensus_encode_base(&mut buf).expect("in-memory writers don't error");
+        debug_assert_eq!(len, buf.len());
+        buf
+    }
+
+    /// Returns true when the AuxPoW version flag is set.
+    pub fn has_aux_pow(&self) -> bool {
+        self.version.has_aux_pow()
+    }
 
     /// Returns the block hash.
     pub fn block_hash(&self) -> BlockHash {
         let mut engine = BlockHash::engine();
-        self.consensus_encode(&mut engine).expect("engines don't error");
+        self.consensus_encode_base(&mut engine).expect("engines don't error");
         BlockHash::from_engine(engine)
     }
 
@@ -92,7 +129,7 @@ impl Header {
     /// The resulting hash is interpreted as a little-endian integer when compared against the
     /// target threshold.
     pub fn pow_hash(&self) -> [u8; 32] {
-        let serialized = encode::serialize(self);
+        let serialized = self.serialize_base();
         debug_assert_eq!(serialized.len(), Self::SIZE);
 
         let params = ScryptParams::new(10, 1, 1, 32).expect("scrypt parameters are valid");
@@ -103,7 +140,9 @@ impl Header {
     }
 
     /// Computes the target (range [0, T] inclusive) that a blockhash must land in to be valid.
-    pub fn target(&self) -> Target { self.bits.into() }
+    pub fn target(&self) -> Target {
+        self.bits.into()
+    }
 
     /// Computes the popular "difficulty" measure for mining.
     ///
@@ -114,7 +153,9 @@ impl Header {
     }
 
     /// Computes the popular "difficulty" measure for mining and returns a float value of f64.
-    pub fn difficulty_float(&self) -> f64 { self.target().difficulty_float() }
+    pub fn difficulty_float(&self) -> f64 {
+        self.target().difficulty_float()
+    }
 
     /// Checks that the proof-of-work for the block is valid, returning the PoW hash.
     pub fn validate_pow(&self, required_target: Target) -> Result<[u8; 32], ValidationError> {
@@ -131,7 +172,9 @@ impl Header {
     }
 
     /// Returns the total work of the block.
-    pub fn work(&self) -> Work { self.target().to_work() }
+    pub fn work(&self) -> Work {
+        self.target().to_work()
+    }
 }
 
 impl fmt::Debug for Header {
@@ -144,7 +187,199 @@ impl fmt::Debug for Header {
             .field("time", &self.time)
             .field("bits", &self.bits)
             .field("nonce", &self.nonce)
+            .field("has_aux_pow", &self.aux_pow.is_some())
             .finish()
+    }
+}
+
+const AUX_POW_VERSION: u8 = 0x00;
+const MAX_CHAIN_BRANCH_HASHES: usize = 30;
+
+/// Merkle branch used inside AuxPoW data.
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(crate = "actual_serde"))]
+pub struct MerkleBranch {
+    /// Hashes forming the merkle path.
+    pub hashes: Vec<BlockHash>,
+    /// Bit mask describing left/right ordering along the path.
+    pub side_mask: u32,
+}
+
+impl MerkleBranch {
+    fn decode_hashes<R: Read + ?Sized>(
+        reader: &mut R,
+    ) -> Result<(Vec<BlockHash>, u32), encode::Error> {
+        let len = VarInt::consensus_decode_from_finite_reader(reader)?.0;
+        let len_usize =
+            usize::try_from(len).map_err(|_| encode::Error::OversizedVectorAllocation {
+                requested: usize::MAX,
+                max: MAX_CHAIN_BRANCH_HASHES,
+            })?;
+
+        if len_usize > MAX_CHAIN_BRANCH_HASHES {
+            return Err(encode::Error::OversizedVectorAllocation {
+                requested: len_usize,
+                max: MAX_CHAIN_BRANCH_HASHES,
+            });
+        }
+
+        let mut hashes = Vec::with_capacity(len_usize);
+        for _ in 0..len_usize {
+            hashes.push(BlockHash::consensus_decode_from_finite_reader(reader)?);
+        }
+
+        let side_mask = u32::consensus_decode_from_finite_reader(reader)?;
+        Ok((hashes, side_mask))
+    }
+}
+
+impl Encodable for MerkleBranch {
+    fn consensus_encode<W: Write + ?Sized>(&self, w: &mut W) -> Result<usize, io::Error> {
+        let mut len = 0;
+        len += VarInt::from(self.hashes.len()).consensus_encode(w)?;
+        for hash in &self.hashes {
+            len += hash.consensus_encode(w)?;
+        }
+        len += self.side_mask.consensus_encode(w)?;
+        Ok(len)
+    }
+}
+
+impl Decodable for MerkleBranch {
+    fn consensus_decode_from_finite_reader<R: Read + ?Sized>(
+        reader: &mut R,
+    ) -> Result<Self, encode::Error> {
+        let (hashes, side_mask) = MerkleBranch::decode_hashes(reader)?;
+        Ok(MerkleBranch { hashes, side_mask })
+    }
+
+    fn consensus_decode<R: Read + ?Sized>(reader: &mut R) -> Result<Self, encode::Error> {
+        MerkleBranch::consensus_decode_from_finite_reader(
+            &mut reader.take(encode::MAX_VEC_SIZE as u64),
+        )
+    }
+}
+
+/// Parent block header included in AuxPoW payload.
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(crate = "actual_serde"))]
+pub struct ParentBlockHeader {
+    /// Parent block version field (may carry chain id/AuxPoW bit).
+    pub version: Version,
+    /// Hash of the previous parent block.
+    pub prev_blockhash: BlockHash,
+    /// Parent merkle root committing to parent transactions.
+    pub merkle_root: TxMerkleNode,
+    /// Parent block timestamp.
+    pub time: u32,
+    /// Parent compact target bits.
+    pub bits: CompactTarget,
+    /// Parent nonce.
+    pub nonce: u32,
+}
+
+impl_consensus_encoding!(
+    ParentBlockHeader,
+    version,
+    prev_blockhash,
+    merkle_root,
+    time,
+    bits,
+    nonce
+);
+
+/// Auxiliary proof-of-work payload appended to merge-mined block headers.
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(crate = "actual_serde"))]
+pub struct AuxPow {
+    /// Coinbase transaction from the parent block that proves merge mining.
+    pub coinbase_tx: Transaction,
+    /// Merkle branch proving the coinbase is in the parent block.
+    pub coinbase_branch: MerkleBranch,
+    /// Merkle branch linking the aux block hash into the parent coinbase.
+    pub blockchain_branch: MerkleBranch,
+    /// Parent block header carrying the PoW.
+    pub parent_block_header: ParentBlockHeader,
+}
+
+impl Encodable for AuxPow {
+    fn consensus_encode<W: Write + ?Sized>(&self, w: &mut W) -> Result<usize, io::Error> {
+        let mut len = 0;
+        len += AUX_POW_VERSION.consensus_encode(w)?;
+        len += self.coinbase_tx.consensus_encode(w)?;
+        len += self.coinbase_branch.consensus_encode(w)?;
+        len += self.blockchain_branch.consensus_encode(w)?;
+        len += self.parent_block_header.consensus_encode(w)?;
+        Ok(len)
+    }
+}
+
+impl Decodable for AuxPow {
+    fn consensus_decode_from_finite_reader<R: Read + ?Sized>(
+        reader: &mut R,
+    ) -> Result<Self, encode::Error> {
+        let version = u8::consensus_decode_from_finite_reader(reader)?;
+        if version != AUX_POW_VERSION {
+            return Err(encode::Error::ParseFailed("unsupported auxpow version"));
+        }
+
+        Ok(AuxPow {
+            coinbase_tx: Transaction::consensus_decode_from_finite_reader(reader)?,
+            coinbase_branch: MerkleBranch::consensus_decode_from_finite_reader(reader)?,
+            blockchain_branch: MerkleBranch::consensus_decode_from_finite_reader(reader)?,
+            parent_block_header: ParentBlockHeader::consensus_decode_from_finite_reader(reader)?,
+        })
+    }
+
+    fn consensus_decode<R: Read + ?Sized>(reader: &mut R) -> Result<Self, encode::Error> {
+        AuxPow::consensus_decode_from_finite_reader(&mut reader.take(encode::MAX_VEC_SIZE as u64))
+    }
+}
+
+impl Encodable for Header {
+    fn consensus_encode<W: Write + ?Sized>(&self, w: &mut W) -> Result<usize, io::Error> {
+        let mut len = self.consensus_encode_base(w)?;
+        if self.version.has_aux_pow() {
+            let aux_pow = self.aux_pow.as_ref().ok_or_else(|| {
+                io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    "auxpow flag set but aux_pow payload is missing",
+                )
+            })?;
+            len += aux_pow.consensus_encode(w)?;
+        }
+        Ok(len)
+    }
+}
+
+impl Decodable for Header {
+    fn consensus_decode_from_finite_reader<R: Read + ?Sized>(
+        reader: &mut R,
+    ) -> Result<Self, encode::Error> {
+        let version = Version::consensus_decode_from_finite_reader(reader)?;
+        let prev_blockhash = BlockHash::consensus_decode_from_finite_reader(reader)?;
+        let merkle_root = TxMerkleNode::consensus_decode_from_finite_reader(reader)?;
+        let time = u32::consensus_decode_from_finite_reader(reader)?;
+        let bits = CompactTarget::consensus_decode_from_finite_reader(reader)?;
+        let nonce = u32::consensus_decode_from_finite_reader(reader)?;
+        let aux_pow = if version.has_aux_pow() {
+            match AuxPow::consensus_decode_from_finite_reader(reader) {
+                Ok(aux) => Some(aux),
+                Err(encode::Error::Io(ref e)) if e.kind() == ErrorKind::UnexpectedEof => None,
+                Err(e) => return Err(e),
+            }
+        } else {
+            None
+        };
+
+        Ok(Header { version, prev_blockhash, merkle_root, time, bits, nonce, aux_pow })
+    }
+
+    fn consensus_decode<R: Read + ?Sized>(reader: &mut R) -> Result<Self, encode::Error> {
+        Header::consensus_decode_from_finite_reader(&mut reader.take(encode::MAX_VEC_SIZE as u64))
     }
 }
 
@@ -176,6 +411,12 @@ impl Version {
     /// BIP-9 compatible version number that does not signal for any softforks.
     pub const NO_SOFT_FORK_SIGNALLING: Self = Self(Self::USE_VERSION_BITS as i32);
 
+    /// AuxPoW flag indicating an extended header payload follows.
+    pub const AUX_POW_FLAG: i32 = 1 << 8;
+
+    /// Mask covering the chain-id bits inside the version field.
+    pub const CHAIN_ID_MASK: i32 = 0x003F_0000;
+
     /// BIP-9 soft fork signal bits mask.
     const VERSION_BITS_MASK: u32 = 0x1FFF_FFFF;
 
@@ -188,12 +429,26 @@ impl Version {
     ///
     /// This is the data type used in consensus code in Bitcoin Core.
     #[inline]
-    pub const fn from_consensus(v: i32) -> Self { Version(v) }
+    pub const fn from_consensus(v: i32) -> Self {
+        Version(v)
+    }
 
     /// Returns the inner `i32` value.
     ///
     /// This is the data type used in consensus code in Bitcoin Core.
-    pub fn to_consensus(self) -> i32 { self.0 }
+    pub fn to_consensus(self) -> i32 {
+        self.0
+    }
+
+    /// Returns true when the AuxPoW bit is set.
+    pub fn has_aux_pow(self) -> bool {
+        (self.0 & Self::AUX_POW_FLAG) != 0
+    }
+
+    /// Extracts the chain id encoded in the version field (bits 16..21).
+    pub fn chain_id(self) -> i32 {
+        (self.0 & Self::CHAIN_ID_MASK) >> 16
+    }
 
     /// Checks whether the version number is signalling a soft fork at the given bit.
     ///
@@ -216,7 +471,9 @@ impl Version {
 }
 
 impl Default for Version {
-    fn default() -> Version { Self::NO_SOFT_FORK_SIGNALLING }
+    fn default() -> Version {
+        Self::NO_SOFT_FORK_SIGNALLING
+    }
 }
 
 impl Encodable for Version {
@@ -256,7 +513,9 @@ impl_consensus_encoding!(Block, header, txdata);
 
 impl Block {
     /// Returns the block hash.
-    pub fn block_hash(&self) -> BlockHash { self.header.block_hash() }
+    pub fn block_hash(&self) -> BlockHash {
+        self.header.block_hash()
+    }
 
     /// Checks if merkle root of header matches merkle root of the transaction list.
     pub fn check_merkle_root(&self) -> bool {
@@ -350,7 +609,7 @@ impl Block {
     /// > Base size is the block size in bytes with the original transaction serialization without
     /// > any witness-related data, as seen by a non-upgraded node.
     fn base_size(&self) -> usize {
-        let mut size = Header::SIZE;
+        let mut size = self.header.serialized_size();
 
         size += VarInt::from(self.txdata.len()).size();
         size += self.txdata.iter().map(|tx| tx.base_size()).sum::<usize>();
@@ -363,7 +622,7 @@ impl Block {
     /// > Total size is the block size in bytes with transactions serialized as described in BIP144,
     /// > including base data and witness data.
     pub fn total_size(&self) -> usize {
-        let mut size = Header::SIZE;
+        let mut size = self.header.serialized_size();
 
         size += VarInt::from(self.txdata.len()).size();
         size += self.txdata.iter().map(|tx| tx.total_size()).sum::<usize>();
@@ -372,7 +631,9 @@ impl Block {
     }
 
     /// Returns the coinbase transaction, if one is present.
-    pub fn coinbase(&self) -> Option<&Transaction> { self.txdata.first() }
+    pub fn coinbase(&self) -> Option<&Transaction> {
+        self.txdata.first()
+    }
 
     /// Returns the block height, as encoded in the coinbase transaction according to BIP34.
     pub fn bip34_block_height(&self) -> Result<u64, Bip34Error> {
@@ -409,19 +670,27 @@ impl Block {
 }
 
 impl From<Header> for BlockHash {
-    fn from(header: Header) -> BlockHash { header.block_hash() }
+    fn from(header: Header) -> BlockHash {
+        header.block_hash()
+    }
 }
 
 impl From<&Header> for BlockHash {
-    fn from(header: &Header) -> BlockHash { header.block_hash() }
+    fn from(header: &Header) -> BlockHash {
+        header.block_hash()
+    }
 }
 
 impl From<Block> for BlockHash {
-    fn from(block: Block) -> BlockHash { block.block_hash() }
+    fn from(block: Block) -> BlockHash {
+        block.block_hash()
+    }
 }
 
 impl From<&Block> for BlockHash {
-    fn from(block: &Block) -> BlockHash { block.block_hash() }
+    fn from(block: &Block) -> BlockHash {
+        block.block_hash()
+    }
 }
 
 /// An error when looking up a BIP34 block height.
@@ -527,7 +796,7 @@ mod tests {
         assert_eq!(bad.bip34_block_height(), Err(super::Bip34Error::UnexpectedPush(push)));
     }
 
-     #[test]
+    #[test]
     fn block_test_loki() {
         let params = Params::new(Network::Bitcoin);
         // Mainnet block c3474fa0b6c00824b01ce630d03f4ba49e11ced6373164b38ed2741dcd90ba84
@@ -670,10 +939,7 @@ mod tests {
         let some_header = hex!("010000004ddccd549d28f385ab457e98d1b11ce80bfea2c5ab93015ade4973e400000000bf4473e53794beae34e64fccc471dace6ae544180816f89591894e0f417a914cd74d6e49ffff001d323b3a7b");
         let some_header: Header =
             deserialize(&some_header).expect("Can't deserialize correct block header");
-        assert_eq!(
-            some_header.validate_pow(some_header.target()).unwrap(),
-            some_header.pow_hash()
-        );
+        assert_eq!(some_header.validate_pow(some_header.target()).unwrap(), some_header.pow_hash());
 
         // test with zero target
         match some_header.validate_pow(Target::ZERO) {

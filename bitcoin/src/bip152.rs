@@ -70,7 +70,9 @@ pub struct PrefilledTransaction {
 }
 
 impl convert::AsRef<Transaction> for PrefilledTransaction {
-    fn as_ref(&self) -> &Transaction { &self.tx }
+    fn as_ref(&self) -> &Transaction {
+        &self.tx
+    }
 }
 
 impl Encodable for PrefilledTransaction {
@@ -236,7 +238,7 @@ impl HeaderAndShortIds {
         }
 
         Ok(HeaderAndShortIds {
-            header: block.header,
+            header: block.header.clone(),
             nonce,
             // Provide coinbase prefilled.
             prefilled_txs: prefilled,
@@ -335,7 +337,9 @@ impl fmt::Display for TxIndexOutOfRangeError {
 
 #[cfg(feature = "std")]
 impl error::Error for TxIndexOutOfRangeError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { None }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
 }
 
 /// A [BlockTransactions] structure is used to provide some of the transactions
@@ -406,6 +410,7 @@ mod test {
                 time: 2,
                 bits: CompactTarget::from_consensus(3),
                 nonce: 4,
+                aux_pow: None,
             },
             txdata: vec![dummy_tx(&[2]), dummy_tx(&[3]), dummy_tx(&[4])],
         }
